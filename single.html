@@ -1013,7 +1013,7 @@ html:has(#s-battle.on),body:has(#s-battle.on){overflow:hidden;height:100%}
 .pv .qpv{font-size:11px;color:#e8c27a}
 
 /* ===== v16d "Grimguard" tactical board: iso diamond camera, raised stone tiles, cliffs, team rings, portrait HUD ===== */
-:root{--brt:rotateX(22deg) rotateZ(45deg);--bri:rotateZ(-45deg) rotateX(-22deg)}
+:root{--brt:rotateX(34deg) scaleY(1.4);--bri:scaleY(.7142857) rotateX(-34deg)}
 #s-battle #dio{background:radial-gradient(ellipse 70% 45% at 50% 46%,#3a3a2c 0,#1f2119 45%,#0b0c09 80%,#050504 100%)!important}
 #s-battle #dio::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.55;
  background:radial-gradient(ellipse 22% 9% at 12% 22%,#2e2b22,#0000 70%),radial-gradient(ellipse 18% 8% at 88% 30%,#2e2b22,#0000 70%),radial-gradient(ellipse 26% 10% at 15% 80%,#26241c,#0000 70%),radial-gradient(ellipse 24% 9% at 86% 78%,#26241c,#0000 70%),
@@ -1166,6 +1166,19 @@ body.g16e #g16chip{position:fixed!important;left:8px!important;right:8px!importa
 body.g16e #g16chip .t{flex:1;min-width:0}body.g16e #g16chip .b{margin:0!important;flex:0 0 auto}body.g16e #g16chip button.ok{padding:6px 14px!important}
 body.g16e.g16chipon #c16hint{display:none!important}
 @media (max-height:520px){body.g16e #g16chip{left:auto!important;right:8px!important;width:250px!important;bottom:calc(env(safe-area-inset-bottom) + 64px)!important}}
+/* v16h: square-on camera, mild perspective so near rows read larger (Grimguard-like) */
+body.g16e #s-battle #dio{perspective:1100px!important;perspective-origin:50% 25%!important}
+@media (max-height:520px){body.g16e #s-battle #dio{perspective:1400px!important}}
+/* v16h crisp figures: no filters on the billboard chain (filters flatten 3D layers and rasterize them at low scale) */
+body.g16e #board .tok .fig .stage,body.g16e #board .tok .fig .fw,body.g16e #board .tok .fig .fw img,body.g16e #board .tok .fig.cv .fw{filter:none!important;-webkit-filter:none!important}
+body.g16e #board .tok .fig .vaura,body.g16e #board .tok .fig .aura{display:none!important}
+/* v16h: crisp figures — screen-space overlay copies (the 3D plane rasterizes at ~1x and upscales) */
+#g16figs{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:hidden}
+#g16figs img{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform,opacity;image-rendering:auto}
+body.g16figs #board .tok .fig .fw img{clip-path:inset(50%)}
+#g16figs .g16hb{position:absolute;z-index:999;height:4px;background:#120c08;border:1px solid #000;border-radius:2px;box-shadow:0 1px 2px #000}
+#g16figs .g16hb i{display:block;height:100%;border-radius:1px;background:#4cd04c}#g16figs .g16hb.e i{background:#e8392f!important}
+body.g16figs #board .tok .fig .hp{visibility:hidden}
 
 .itimg{position:relative;display:block;width:100%;height:100%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--rc) 28%,transparent) 0,transparent 68%)}.itimg::before{content:"";position:absolute;inset:3%;border-radius:50%;border:1.5px dashed var(--rc);opacity:.55}.itimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 3px #0006)}
 /* v16d mobile hardening */
@@ -4293,7 +4306,9 @@ function renderTeam(){
 $("#goAI").onclick=()=>{if(!save.team.length)return toast("Pick at least 1 creature for Player 1");startBattle("ai");};
 $("#goPvP").onclick=()=>{if(!save.team.length||!save.team2.length)return toast("Both Player 1 and Player 2 need a team");startBattle("pvp");};
 // ---------- BATTLE ENGINE (pure) ----------
-const BRT="rotateX(22deg) rotateZ(45deg)";const SPX=[2,5,3,4];const N=8,BIO=Object.keys(BIOMES);
+let BRT="rotateX(34deg) scaleY(1.4)";/* v16h: square-on; portrait stretches depth so the arena fills the tall screen */
+function camSet(){const port=innerHeight>innerWidth*1.1,sy=port?1.4:1;BRT=`rotateX(34deg) scaleY(${sy})`;const R=document.documentElement.style;R.setProperty("--brt",BRT);R.setProperty("--bri",`scaleY(${(1/sy).toFixed(5)}) rotateX(-34deg)`);}
+camSet();addEventListener("resize",()=>{const o=BRT;camSet();if(o!==BRT&&window.CB161&&CB161.fit)setTimeout(()=>CB161.fit(),50);});const SPX=[2,5,3,4];const N=8,BIO=Object.keys(BIOMES);
 function makeFeat(r,b){const P=FT[b].p,NN=N*N;
  const nf=(B,x,y)=>B.reduce((a,o)=>a+o.w*Math.exp(-((x-o.x)**2+(y-o.y)**2)/(2*o.s*o.s)),0);
  const blobs=()=>[...Array(8)].map(()=>({x:r()*N,y:r()*N,s:1+r()*2.2,w:r()<.6?1:-.7}));
@@ -5988,5 +6003,25 @@ wrap("syncTokens",o=>function(){const r=o.apply(this,arguments);try{cards();chip
 let raf=0;new MutationObserver(()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;try{chip();cards();}catch(e){}});}).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:["class"]});
 window.CB16E={arena,kinds,TPL,chip};
 })();
+/* v16h: screen-space figure overlay. Each unit's sprite is redrawn in a flat layer at native DPR, exactly over the
+   (billboarded, hence screen-aligned) original <img> rect, so lunges/hits/moves follow; original is clipped away. */
+(function(){let L=null,M=new Map(),on=false;
+ const op=e=>{let o=1;for(let n=e;n&&n.id!=="board";n=n.parentElement){const c=getComputedStyle(n);o*=+c.opacity;if(c.visibility==="hidden"||c.display==="none")return 0;}return o;};
+ function tick(){if(!on)return;const bd=document.getElementById("board"),dio=document.getElementById("dio");
+  if(!bd||!dio||!document.body.classList.contains("g16e")||!document.querySelector("#s-battle.on")){if(L)L.style.display="none";requestAnimationFrame(tick);return;}
+  if(!L||!L.isConnected){L=document.createElement("div");L.id="g16figs";dio.appendChild(L);M.clear();}L.style.display="";document.body.classList.add("g16figs");
+  const d=dio.getBoundingClientRect(),seen=new Set(),list=[];
+  bd.querySelectorAll(".tok").forEach(t=>{const s=t.querySelector(".fig .fw img");if(!s||!s.complete||!s.naturalWidth)return;const r=s.getBoundingClientRect();if(!r.width)return;
+   let c=M.get(t.id);if(!c){c=document.createElement("img");c.decoding="async";L.appendChild(c);M.set(t.id,c);}if(c._src!==s.currentSrc){c.src=s.currentSrc;c._src=s.currentSrc;}
+   seen.add(t.id);const f=getComputedStyle(s).filter,sf=getComputedStyle(s.closest(".stage")||s).filter;
+   c.style.width=r.width+"px";c.style.height=r.height+"px";c.style.transform=`translate(${(r.left-d.left).toFixed(2)}px,${(r.top-d.top).toFixed(2)}px)`;
+   c.style.opacity=op(s).toFixed(3);c.style.filter=[sf,f].filter(x=>x&&x!=="none"&&!/drop-shadow/.test(x)).join(" ")||"none";list.push([r.bottom,c]);
+   const h=t.querySelector(".fig .hp");let hb=M.get(t.id+"h");if(h&&getComputedStyle(h).display!=="none"&&!t.classList.contains("dead")){const q=h.getBoundingClientRect(),hi=h.querySelector("i");
+    if(!hb){hb=document.createElement("b");hb.className="g16hb";hb.innerHTML="<i></i>";L.appendChild(hb);M.set(t.id+"h",hb);}hb.classList.toggle("e",h.classList.contains("e"));
+    hb.style.cssText=`left:${(q.left-d.left).toFixed(1)}px;top:${(q.top-d.top).toFixed(1)}px;width:${q.width.toFixed(1)}px`;const ci=hb.firstChild;ci.style.width=hi?hi.style.width:"100%";ci.style.background=hi?getComputedStyle(hi).backgroundColor:"";seen.add(t.id+"h");}});
+  for(const[k,c]of M)if(!seen.has(k)){c.remove();M.delete(k);}
+  list.sort((a,b)=>a[0]-b[0]).forEach(([,c],i)=>{c.style.zIndex=i+1;});requestAnimationFrame(tick);}
+ window.CB16FIG={start(){if(!on){on=true;requestAnimationFrame(tick);}},stop(){on=false;document.body.classList.remove("g16figs");L&&L.remove();}};
+ CB16FIG.start();})();
 
 </script></body></html>
