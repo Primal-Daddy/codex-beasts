@@ -1013,7 +1013,7 @@ html:has(#s-battle.on),body:has(#s-battle.on){overflow:hidden;height:100%}
 .pv .qpv{font-size:11px;color:#e8c27a}
 
 /* ===== v16d "Grimguard" tactical board: iso diamond camera, raised stone tiles, cliffs, team rings, portrait HUD ===== */
-:root{--brt:rotateX(56deg) rotateZ(45deg);--bri:rotateZ(-45deg) rotateX(-56deg)}
+:root{--brt:rotateX(45deg) rotateZ(45deg);--bri:rotateZ(-45deg) rotateX(-45deg)}
 #s-battle #dio{background:radial-gradient(ellipse 70% 45% at 50% 46%,#3a3a2c 0,#1f2119 45%,#0b0c09 80%,#050504 100%)!important}
 #s-battle #dio::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.55;
  background:radial-gradient(ellipse 22% 9% at 12% 22%,#2e2b22,#0000 70%),radial-gradient(ellipse 18% 8% at 88% 30%,#2e2b22,#0000 70%),radial-gradient(ellipse 26% 10% at 15% 80%,#26241c,#0000 70%),radial-gradient(ellipse 24% 9% at 86% 78%,#26241c,#0000 70%),
@@ -1148,6 +1148,18 @@ body.g16e #s-battle #board .tok .fig .stage .fw{position:absolute!important;inse
 body.g16e #s-battle #board .tok .fig .stage .fw img{position:absolute!important;inset:0!important;width:100%!important;height:104%!important;max-width:none!important;object-fit:contain!important;object-position:50% 100%!important}
 body.g16e #board .tok.fly .fig .fw{animation:g16hov 2.6s ease-in-out infinite!important;animation-delay:calc(var(--bd,0) * -1s)!important}
 @keyframes g16hov{0%,100%{transform:translateY(-6%)}50%{transform:translateY(-12%)}}
+/* v16f: figures fit to alpha bounds (JS), feet on tile centre */
+body.g16e #board .tok .fig{left:0!important;right:0!important;width:auto!important;bottom:50%!important;top:auto!important;height:140%!important;transform:translateZ(6px) var(--bri)!important;transform-origin:50% 100%!important}
+body.g16e #board .tok.cur .fig{transform:translateZ(6px) var(--bri)!important}
+body.g16e #s-battle #board .tok .fig .stage{left:0!important;right:0!important;top:0!important;bottom:0!important}
+body.g16e #s-battle #board .tok .fig .stage .fw{inset:0!important;height:auto!important;overflow:visible!important}
+body.g16e #board .tok .fig .hp{top:var(--hy,0)!important;left:28%!important;right:28%!important;height:4px!important}
+body.g16e #board .tok .fig .pips{top:calc(var(--hy,0px) - 10px)!important;left:28%!important}
+body.g16e #board .tok.cur .fig::after{top:calc(var(--hy,0px) - 18px)!important}
+body.g16e #board .tok .fig .aura{display:none!important}
+#g16chip{width:136px!important;padding:4px 6px!important;font-size:10px!important}
+#g16chip .b{margin-top:3px}#g16chip button{padding:3px 0!important;font-size:11px!important}
+body.g16e #c16hint{font-size:10px!important;padding:3px 9px!important;bottom:calc(env(safe-area-inset-bottom) + 172px)!important}
 
 .itimg{position:relative;display:block;width:100%;height:100%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--rc) 28%,transparent) 0,transparent 68%)}.itimg::before{content:"";position:absolute;inset:3%;border-radius:50%;border:1.5px dashed var(--rc);opacity:.55}.itimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 3px #0006)}
 /* v16d mobile hardening */
@@ -4275,7 +4287,7 @@ function renderTeam(){
 $("#goAI").onclick=()=>{if(!save.team.length)return toast("Pick at least 1 creature for Player 1");startBattle("ai");};
 $("#goPvP").onclick=()=>{if(!save.team.length||!save.team2.length)return toast("Both Player 1 and Player 2 need a team");startBattle("pvp");};
 // ---------- BATTLE ENGINE (pure) ----------
-const BRT="rotateX(56deg) rotateZ(45deg)";const SPX=[2,5,3,4];const N=8,BIO=Object.keys(BIOMES);
+const BRT="rotateX(45deg) rotateZ(45deg)";const SPX=[2,5,3,4];const N=8,BIO=Object.keys(BIOMES);
 function makeFeat(r,b){const P=FT[b].p,NN=N*N;
  const nf=(B,x,y)=>B.reduce((a,o)=>a+o.w*Math.exp(-((x-o.x)**2+(y-o.y)**2)/(2*o.s*o.s)),0);
  const blobs=()=>[...Array(8)].map(()=>({x:r()*N,y:r()*N,s:1+r()*2.2,w:r()<.6?1:-.7}));
@@ -5798,7 +5810,7 @@ window.CB16H={H,sheet,hint,ono,chips};
 // ===== v16.1 camera: frame every unit (figure + base) inside the viewport, above the sheet when it is open =====
 (function(){
 const wrap=(name,f)=>{const o=window[name];if(typeof o!=="function")return;const w=f(o);window[name]=w;try{eval(name+"=w");}catch(e){}};
-const F={m:18,maxZ:2.6,last:null,n:0};
+const F={m:11,maxZ:2.6,last:null,n:0};
 function box(){const r={l:1e9,t:1e9,r:-1e9,b:-1e9};let n=0;
  if(document.body.classList.contains("g16e")){document.querySelectorAll("#board .cell.g16f:not(.kv)").forEach(e=>{const q=e.getBoundingClientRect();if(!q.width)return;n++;r.l=Math.min(r.l,q.left);r.t=Math.min(r.t,q.top);r.r=Math.max(r.r,q.right);r.b=Math.max(r.b,q.bottom+12);});if(n){const c0=document.querySelector("#board .cell.g16f:not(.kv)").getBoundingClientRect();r.t-=Math.max(30,c0.width*1.5);return r;}}
  document.querySelectorAll("#board .tok").forEach(t=>{if(t.classList.contains("dead"))return;[t.querySelector(".fw img,.fw svg"),t.querySelector(".fig .base")].forEach(e=>{if(!e)return;const b=e.getBoundingClientRect();if(!b.width)return;n++;r.l=Math.min(r.l,b.left);r.t=Math.min(r.t,b.top);r.r=Math.max(r.r,b.right);r.b=Math.max(r.b,b.bottom);});});
@@ -5936,7 +5948,20 @@ function arena(){const bd=document.getElementById("board");if(!bd||bd.dataset.g1
   if(k==="W"){c.style.setProperty("--mc",P[2]);}
   if(k==="c"){const l=document.createElement("i");l.className="g16log";c.appendChild(l);}});
  // tokens stand on the slab tops
- bd.querySelectorAll(".tok .s16k").forEach(e=>e.remove());}
+ bd.querySelectorAll(".tok .s16k").forEach(e=>e.remove());fitAll();}
+
+const ABB=new Map();
+function abb(img){const k=img.currentSrc||img.src;if(ABB.has(k))return ABB.get(k);if(!img.naturalWidth)return null;
+ const W=96,H=Math.max(1,Math.round(96*img.naturalHeight/img.naturalWidth)),c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d",{willReadFrequently:true});g.drawImage(img,0,0,W,H);
+ let d;try{d=g.getImageData(0,0,W,H).data;}catch(e){return null;}let x0=W,y0=H,x1=-1,y1=-1;for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(d[(y*W+x)*4+3]>40){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}
+ const r=x1<0?{x:0,y:0,w:1,h:1}:{x:x0/W,y:y0/H,w:(x1-x0+1)/W,h:(y1-y0+1)/H};ABB.set(k,r);return r;}
+function fitFig(t){const bd=document.getElementById("board"),img=t.querySelector(".fw img"),f=t.querySelector(".fig");if(!bd||!img||!f)return;const tw=bd.offsetWidth/N;
+ const go=()=>{const b=abb(img);if(!b)return;const nw=img.naturalWidth,nh=img.naturalHeight,bw=b.w*nw,bh=b.h*nh,s=Math.min(.9*tw/bw,1.4*tw/bh);
+  const fw=tw,fh=1.4*tw,W=nw*s,H=nh*s,left=fw/2-(b.x*nw+bw/2)*s,top=fh-(b.y+b.h)*nh*s,P=(v,d)=>(v/d*100).toFixed(2)+"%";
+  img.style.cssText+=`;position:absolute!important;width:${P(W,fw)}!important;height:${P(H,fh)}!important;left:${P(left,fw)}!important;top:${P(top,fh)}!important;max-width:none!important;max-height:none!important;object-fit:fill!important`;
+  f.style.setProperty("--hy",`calc(${P(fh-bh*s,fh)} - 9px)`);f.dataset.fit=1;};
+ if(img.complete&&img.naturalWidth)go();else img.addEventListener("load",go,{once:true});}
+function fitAll(){document.querySelectorAll("#board .tok").forEach(t=>{const i=t.querySelector(".fw img");if(i&&t.dataset.fs!==(i.currentSrc||i.src).slice(-40)){t.dataset.fs=(i.currentSrc||i.src).slice(-40);fitFig(t);}});}
 function chip(){const p=document.getElementById("bPanel"),cf=document.getElementById("cfm");let C=document.getElementById("g16chip");
  if(!cf||!p||!p.contains(cf)||cf.offsetParent===null&&!p.contains(cf)){C&&C.remove();return;}
  const box=cf.closest("div[style*='dashed']")||cf.parentElement.parentElement;const txt=box.textContent.replace(/\s+/g," ").split("Confirm")[0].trim().slice(0,120);
@@ -5944,7 +5969,9 @@ function chip(){const p=document.getElementById("bPanel"),cf=document.getElement
  const cancel=[...p.querySelectorAll("button")].find(b=>/Cancel/.test(b.textContent));
  if(C.dataset.t!==txt){C.dataset.t=txt;C.innerHTML=`<div class="t">${txt.replace(/(\d+ dmg)/,"<em>$1</em>")}</div><div class="b"><button class="ok">Confirm</button><button class="no">✕</button></div>`;
   C.querySelector(".ok").onclick=e=>{e.stopPropagation();const c2=document.getElementById("cfm");c2&&c2.click();};C.querySelector(".no").onclick=e=>{e.stopPropagation();const c3=[...p.querySelectorAll("button")].find(b=>/Cancel/.test(b.textContent));c3&&c3.click();};}
- const tg=(typeof ui!=="undefined"&&ui&&ui.tgt)||null,t=(tg&&tg.id!=null&&document.querySelector("#u"+tg.id+" .fw img"))||document.querySelector("#board .cell.tsel"),d=document.getElementById("dio").getBoundingClientRect();if(t){const r=t.getBoundingClientRect();let x=r.left+r.width/2-d.left-80,y=r.top-d.top-(C.offsetHeight||80)-6;x=Math.max(6,Math.min(d.width-166,x));if(y<60)y=r.bottom-d.top+8;C.style.left=x+"px";C.style.top=y+"px";}}
+ const tg=(typeof ui!=="undefined"&&ui&&ui.tgt)||null,t=(tg&&tg.id!=null&&document.querySelector("#u"+tg.id+" .fw img"))||document.querySelector("#board .cell.tsel"),d=document.getElementById("dio").getBoundingClientRect();if(t){const r=t.getBoundingClientRect(),cw=C.offsetWidth||140,ch=C.offsetHeight||60;let x=r.left+r.width/2-d.left-cw/2,y=r.top-d.top-ch-6;x=Math.max(6,Math.min(d.width-cw-6,x));if(y<54)y=r.bottom-d.top+6;
+ const cu=typeof ui!=="undefined"&&ui&&ui.sel&&document.querySelector("#u"+ui.sel.id+" .fw img");if(cu){const a=cu.getBoundingClientRect(),ov=(X,Y)=>X<a.right-d.left&&X+cw>a.left-d.left&&Y<a.bottom-d.top&&Y+ch>a.top-d.top;if(ov(x,y)){const alt=[[x,r.bottom-d.top+6],[r.right-d.left+6,r.top-d.top],[r.left-d.left-cw-6,r.top-d.top]];for(const[X,Y]of alt){const X2=Math.max(6,Math.min(d.width-cw-6,X)),Y2=Math.max(54,Math.min(d.height-ch-170,Y));if(!ov(X2,Y2)){x=X2;y=Y2;break;}}}}
+ C.style.left=x+"px";C.style.top=y+"px";}}
 function cards(){const H=document.getElementById("g16cards");if(!H||typeof B==="undefined"||!B||B.over)return;const u=cur(B);if(!u)return;const mine=!u.side||B.mode==="pvp";if(!mine){H.innerHTML="";return;}
  const go=re=>{const find=()=>[...document.querySelectorAll("#bPanel button")].find(b=>re.test(b.textContent)&&!b.disabled);let b=find();if(b){b.click();return;}try{tapCell(u.x,u.y);}catch(e){}let n=0;const f=()=>{const b2=find();if(b2)b2.click();else if(n++<20)requestAnimationFrame(f);};requestAnimationFrame(f);};
  const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
@@ -5952,7 +5979,7 @@ function cards(){const H=document.getElementById("g16cards");if(!H||typeof B==="
  if(!H.querySelector(".it")){const it=document.createElement("button");it.className="sc it";it.innerHTML="<i>🎒</i>Item";it.onclick=e=>{e.stopPropagation();go(/Item/);};H.appendChild(it);
   const w=document.createElement("button");w.className="g16wait";w.textContent="Wait";w.onclick=e=>{e.stopPropagation();go(/Wait|End turn/);};H.appendChild(w);}}
 wrap("buildBoard",o=>function(){const bd=document.getElementById("board");if(bd)delete bd.dataset.g16e;const r=o.apply(this,arguments);try{arena();cards();}catch(e){console.warn(e)}return r;});
-wrap("syncTokens",o=>function(){const r=o.apply(this,arguments);try{cards();chip();}catch(e){}return r;});
+wrap("syncTokens",o=>function(){const r=o.apply(this,arguments);try{cards();chip();fitAll();}catch(e){}return r;});
 let raf=0;new MutationObserver(()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;try{chip();cards();}catch(e){}});}).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:["class"]});
 window.CB16E={arena,kinds,TPL,chip};
 })();
