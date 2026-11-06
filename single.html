@@ -1086,8 +1086,9 @@ html,body{overflow-x:hidden}@supports (overflow:clip){html,body{overflow-x:clip}
 /* ===== v16e arena ===== */
 body.g16e #board{background:none!important;box-shadow:none!important}
 body.g16e #board #terr,body.g16e #board .g16wall,body.g16e #board .g16moss,body.g16e #board .tok .s16k{display:none!important}
-body.g16e #board .prop{display:block!important;filter:saturate(1.25) contrast(1.08);-webkit-filter:saturate(1.25) contrast(1.08)}
-body.g16e #board .prop img{filter:drop-shadow(0 0 1.2px #1a1008) drop-shadow(0 2px 0 #0006);image-rendering:auto}
+body.g16e #board .prop{display:block!important;filter:saturate(1.25) contrast(1.08);-webkit-filter:saturate(1.25) contrast(1.08);transform-style:preserve-3d}
+body.g16e #board .prop.rocks,body.g16e #board .prop.ice{display:none!important}/* v16l: ground props can't stand */
+body.g16e #board .prop img{transform:var(--bri)!important;transform-origin:50% 100%!important;filter:drop-shadow(0 0 1.2px #1a1008) drop-shadow(0 2px 0 #0006);image-rendering:auto}
 #board .cell.g16f{transform-style:preserve-3d;transform:translateZ(var(--h,0px));overflow:visible!important;border-radius:1px;--hl:#0000;
  background:linear-gradient(var(--hl),var(--hl)),radial-gradient(circle at 28% 24%,#ffffff22,#0000 55%),linear-gradient(135deg,var(--s1),var(--s2))!important;
  box-shadow:inset 1px 1px 0 #ffffff30,inset -1.5px -1.5px 0 #0000007a,0 0 0 .5px #0008!important}
@@ -1187,11 +1188,18 @@ body.g16e #dio,body.g16e #board{touch-action:none!important}
 body.g16e #dio #zReset{display:none;top:auto!important;bottom:calc(env(safe-area-inset-bottom) + 212px)!important;right:10px!important;width:38px;height:38px;border-radius:50%!important;font-size:20px!important;padding:0!important;background:#2a2016e6!important;border:1.5px solid #c9a35a!important;color:#f2e2bd!important;z-index:65!important}
 
 /* ===== v16j anime biomes: vibrant cel tiles, themed pits/walls, edge scenery, dio wash ===== */
-body.g16e #s-battle #dio{background:radial-gradient(ellipse 80% 55% at 50% 42%,var(--bio0,#34352a) 0,var(--bio1,#1c1e16) 48%,var(--bio2,#0a0b08) 85%)!important}
-body.g16e #s-battle #dio::before{opacity:.45;background:
- radial-gradient(ellipse 28% 12% at 14% 18%,color-mix(in srgb,var(--bia,#8f8) 35%,transparent),#0000 70%),
- radial-gradient(ellipse 24% 10% at 86% 26%,color-mix(in srgb,var(--bis,#afa) 28%,transparent),#0000 70%),
- radial-gradient(ellipse 30% 12% at 50% 88%,color-mix(in srgb,var(--bio0,#666) 22%,transparent),#0000 70%)!important}
+/* v16l: faint mystical galaxy backdrop (biome-tinted, low contrast) */
+body.g16e #s-battle #dio{background:
+ radial-gradient(ellipse 55% 40% at 22% 18%,color-mix(in srgb,var(--bia,#c9a8ff) 22%,#1a0a3a),transparent 62%),
+ radial-gradient(ellipse 50% 38% at 78% 72%,color-mix(in srgb,var(--bio0,#5a3a8a) 18%,#0a1848),transparent 60%),
+ radial-gradient(ellipse 70% 55% at 50% 45%,#14082c 0%,#08041a 42%,#03010e 100%)!important}
+body.g16e #s-battle #dio::before{opacity:.55;background:
+ radial-gradient(ellipse 40% 28% at 60% 30%,color-mix(in srgb,var(--bis,#afe) 12%,transparent),#0000 70%),
+ radial-gradient(ellipse 35% 22% at 25% 75%,color-mix(in srgb,var(--bia,#caf) 10%,transparent),#0000 70%),
+ repeating-linear-gradient(115deg,#0000 0 48px,#ffffff05 48px 49px,#0000 49px 110px)!important}
+body.g16e #s-battle #dio::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.35;
+ background:radial-gradient(ellipse 80% 70% at 50% 50%,#0000 40%,#02010ccc 100%);mix-blend-mode:multiply}
+#g16gal{position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.75;will-change:transform}
 #board .cell.g16f{border-radius:3px!important;box-shadow:inset 1.5px 1.5px 0 #ffffff55,inset -2px -2px 0 #00000088,0 0 0 1.2px #1a1208cc!important}
 #board .cell.g16f.kf{background:
  linear-gradient(var(--hl),var(--hl)),
@@ -1262,14 +1270,15 @@ body.g16e #s-battle #dio::before{opacity:.45;background:
 #board[data-biome="Tundra"] .cell.g16f.kf::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 40% 40%,#fff 0 1.5px,#0000 2px),radial-gradient(circle at 70% 60%,#fff 0 1px,#0000 2px);opacity:.7}
 #board[data-biome="Volcanic"] .cell.g16f.kf::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(45deg,#0000 0 8px,#ff6a2033 8px 9px);opacity:.55}
 #board[data-biome="Ruins"] .cell.g16f.kf::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 50%,#e8a0ff33,#0000 60%)}
-/* edge scenery around the board */
-#g16edge{position:absolute;inset:-18% -14%;pointer-events:none;z-index:1;transform:translateZ(-8px)}
-#g16edge .g16esc{position:absolute;width:calc(var(--sc,1)*18%);transform:scale(var(--sc,1));filter:drop-shadow(0 0 1px #000) drop-shadow(0 3px 2px #000a);opacity:.92}
-#g16edge .g16esc img{width:100%;height:auto;display:block;filter:saturate(1.2) contrast(1.05)}
-#g16edge .g16esc[data-side="n"]{top:2%;left:calc(var(--u)*.85*100% + 5%)}
-#g16edge .g16esc[data-side="s"]{bottom:0;left:calc(var(--u)*.85*100% + 5%);transform:scale(var(--sc,1)) scaleY(.85)}
-#g16edge .g16esc[data-side="w"]{left:0;top:calc(18% + var(--u)*55%)}
-#g16edge .g16esc[data-side="e"]{right:0;top:calc(18% + var(--u)*55%)}
+/* v16l: edge scenery billboarded upright (counter-rotate like figures) */
+#g16edge{position:absolute;inset:-22% -16%;pointer-events:none;z-index:2;transform-style:preserve-3d}
+#g16edge .g16esc{position:absolute;width:calc(var(--sc,1)*16%);transform-origin:50% 100%;transform:var(--bri) scale(var(--sc,1));
+ filter:drop-shadow(0 0 1px #000) drop-shadow(0 3px 2px #000a);opacity:.9;transform-style:preserve-3d}
+#g16edge .g16esc img{width:100%;height:auto;display:block;filter:saturate(1.2) contrast(1.05);transform-origin:50% 100%}
+#g16edge .g16esc[data-side="n"]{top:4%;left:calc(var(--u)*.8*100% + 8%);z-index:0}
+#g16edge .g16esc[data-side="s"]{bottom:-2%;left:calc(var(--u)*.8*100% + 8%);z-index:4}
+#g16edge .g16esc[data-side="w"]{left:-2%;top:calc(22% + var(--u)*50%);z-index:2}
+#g16edge .g16esc[data-side="e"]{right:-2%;top:calc(22% + var(--u)*50%);z-index:2}
 #g16figs .g16obx{position:absolute;left:0;top:0;transform-origin:0 0;border-radius:4px;background:linear-gradient(#0000,#0006);pointer-events:none}
 #g16figs img{filter:drop-shadow(0 0 .6px #000c)}
 
@@ -4533,13 +4542,13 @@ const PROP={pine:[1.0,2.0],oak:[1.25,1.37],bush:[.62,.57],reeds:[.55,.88],pillar
 function propsFor(b,f,x,y,seed){const r=k=>hsh(x,y,seed+k),o=[],P=(k,fx,fy,sc)=>o.push({k,fx,fy,s:sc});
  const tree=(i)=>P(r(2+i)<.55?"pine":"oak",.3+r(4+i)*.4,.16+r(7+i)*.14,.8+r(9+i)*.25);
  if(b==="Forest"){if(f===3){P("pine",.28,.2,.85+r(1)*.2);P(r(3)<.5?"oak":"pine",.72,.28,.8+r(2)*.2);}else if(f===1){P("bush",.3+r(1)*.4,.3,.8);if(r(5)<.5)tree(0);}else if(f===2&&r(1)<.5)tree(1);else if(f===0&&r(1)<.08)P("bush",.5,.3,.7);}
- if(b==="Mountain"){if(f===3)P("crag",.5,.3,.85+r(3)*.2);else if(f===2&&r(1)<.45)P("rocks",.5,.25,.55+r(2)*.2);}
- if(b==="Water"){if(f===2)P("rocks",.5,.3,.6+r(2)*.2);else if(f===0&&r(1)<.14)P(r(2)<.5?"bush":"pine",.5,.25,.7);}
- if(b==="Desert"){if(f===2)P("rocks",.5,.3,.75);else if(f===3&&r(1)<.6)P("reeds",.25+r(2)*.5,.18,.75);}
+ if(b==="Mountain"){if(f===3)P("crag",.5,.3,.85+r(3)*.2);else if(f===2&&r(1)<.45)P("crag",.5,.25,.7+r(2)*.2);}
+ if(b==="Water"){if(f===2)P("reeds",.5,.3,.75+r(2)*.15);else if(f===0&&r(1)<.14)P(r(2)<.5?"bush":"pine",.5,.25,.7);}
+ if(b==="Desert"){if(f===2)P("crag",.5,.3,.75);else if(f===3&&r(1)<.6)P("reeds",.25+r(2)*.5,.18,.75);}
  if(b==="Swamp"){if(f===1&&r(1)<.5)P("reeds",.3+r(2)*.4,.25,.85);else if(f===2)P(r(2)<.7?"bush":"oak",.5,.25,.75);else if(f===3&&r(1)<.3)P("reeds",.2,.15,.7);}
- if(b==="Tundra"){if(f===2&&r(1)<.65)P("ice",.5,.25,.8);else if(f===1&&r(1)<.15)P("ice",.5,.3,.55);else if(f===0&&r(1)<.05)P("pine",.5,.2,.75);}
- if(b==="Volcanic"){if(f===2&&r(1)<.4)P("rocks",.5,.25,.55);}
- if(b==="Ruins"){if(f===3)P("pillar",.5,.45,.9+r(2)*.3);else if(f===1&&r(1)<.4)P("rocks",.5,.3,.45);}
+ if(b==="Tundra"){if(f===2&&r(1)<.65)P("pine",.5,.22,.8);else if(f===1&&r(1)<.15)P("crag",.5,.28,.65);else if(f===0&&r(1)<.05)P("pine",.5,.2,.75);}
+ if(b==="Volcanic"){if(f===2&&r(1)<.4)P("crag",.5,.25,.7);else if(f===3&&r(1)<.35)P("pillar",.5,.4,.85);}
+ if(b==="Ruins"){if(f===3)P("pillar",.5,.45,.9+r(2)*.3);else if(f===1&&r(1)<.4)P("pillar",.5,.3,.55);}
  if(b==="Plains"){if(f===1&&r(1)<.25)P("bush",.5,.3,.8);else if(f===2&&r(1)<.35)P("oak",.5,.22,.75);}
  return o;}
 function addProps(bd){const cs=100/N,seed=(B.feat.reduce((a,v,i)=>a+v*i,0))&1023;
@@ -6068,20 +6077,36 @@ function arena(){const bd=document.getElementById("board");if(!bd||bd.dataset.g1
  try{biomeDress(bd,P);}catch(e){}
  fitAll();}
 /* v16j: anime biome ambience, edge scenery, prop revive */
-const EDGE={Plains:["bush","oak","bush"],Forest:["pine","oak","pine","pine"],Water:["reeds","reeds","rocks"],Desert:["rocks","rocks","reeds"],Swamp:["reeds","bush","oak"],Mountain:["crag","rocks","crag"],Tundra:["pine","ice","pine"],Volcanic:["rocks","crag","rocks"],Ruins:["pillar","rocks","pillar"]};
-const DIOBG={Plains:["#6a9a3a","#2a4a18","#0a1408"],Forest:["#1a5a28","#0a2814","#041008"],Water:["#1a5a8a","#0a2848","#041018"],Desert:["#c48a2a","#6a4010","#2a1808"],Swamp:["#3a5a28","#1a2810","#081008"],Mountain:["#6a6870","#2a2830","#101018"],Tundra:["#7aa0c0","#2a4058","#0a1828"],Volcanic:["#8a2a18","#3a1008","#140804"],Ruins:["#5a3a8a","#241848","#0c0818"]};
+const EDGE={/* v16l: upright-only billboards (no rocks/ice — they lay flat) */Plains:["bush","oak","bush"],Forest:["pine","oak","pine","pine"],Water:["reeds","reeds","bush"],Desert:["crag","crag","reeds"],Swamp:["reeds","bush","oak"],Mountain:["crag","crag","pine"],Tundra:["pine","pine","crag"],Volcanic:["crag","crag","pillar"],Ruins:["pillar","pillar","crag"]};
+const DIOBG={/* faint biome tint over galaxy */Plains:["#3a6a4a","#1a2a38","#0a0818"],Forest:["#1a4a38","#0a2030","#060818"],Water:["#1a3a6a","#0a1840","#060818"],Desert:["#5a3a2a","#1a1830","#0a0818"],Swamp:["#2a3a28","#121828","#060810"],Mountain:["#3a3a4a","#181828","#080810"],Tundra:["#3a4a6a","#182038","#080818"],Volcanic:["#4a1a28","#1a0820","#0a0410"],Ruins:["#3a2a5a","#180828","#0a0618"]};
+function galaxy(dio){if(!dio)return;let cv=document.getElementById("g16gal");
+ if(!cv){cv=document.createElement("canvas");cv.id="g16gal";dio.insertBefore(cv,dio.firstChild||null);}
+ const W=dio.clientWidth||390,H=dio.clientHeight||844,d=Math.min(2,devicePixelRatio||1);
+ if(cv.width!==Math.round(W*d)||cv.height!==Math.round(H*d)){cv.width=Math.round(W*d);cv.height=Math.round(H*d);cv.style.width=W+"px";cv.style.height=H+"px";}
+ const g=cv.getContext("2d");g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,W,H);
+ const bm=dio.dataset.biome||"Ruins",seed=(bm.charCodeAt(0)*97+bm.length*13)|0;const rnd=()=>{let x=Math.sin(seed+g._n*127.1)*43758.5453;g._n=(g._n||0)+1;return x-Math.floor(x);};g._n=1;
+ // faint constellation / rune strokes
+ g.strokeStyle="rgba(200,180,255,0.07)";g.lineWidth=1;for(let k=0;k<5;k++){const x0=rnd()*W,y0=rnd()*H;g.beginPath();g.moveTo(x0,y0);for(let j=0;j<3;j++)g.lineTo(x0+(rnd()-.5)*90,y0+(rnd()-.5)*70);g.stroke();}
+ // stars
+ for(let i=0;i<110;i++){const x=rnd()*W,y=rnd()*H,r=.4+rnd()*1.4,a=.25+rnd()*.55;g.fillStyle=`rgba(255,245,${200+(rnd()*55|0)},${a})`;g.beginPath();g.arc(x,y,r,0,7);g.fill();
+  if(rnd()>.82){g.fillStyle=`rgba(255,255,255,${.08+rnd()*.12})`;g.beginPath();g.arc(x,y,r*3.5,0,7);g.fill();}}
+ // soft nebula blobs (biome-tinted via CSS vars read as fallback)
+ const c0=getComputedStyle(dio).getPropertyValue("--bia").trim()||"#c9a8ff";
+ for(let i=0;i<4;i++){const x=rnd()*W,y=rnd()*H,R=40+rnd()*90;const gr=g.createRadialGradient(x,y,0,x,y,R);gr.addColorStop(0,c0+"22");gr.addColorStop(1,c0+"00");g.fillStyle=gr;g.beginPath();g.arc(x,y,R,0,7);g.fill();}
+ cv._par=1;}
 function biomeDress(bd,P){const bm=B.biome||"Plains",dio=document.getElementById("dio");
  if(dio){dio.dataset.biome=bm;document.body.dataset.biome=bm;const bg=DIOBG[bm]||DIOBG.Plains;
   dio.style.setProperty("--bio0",bg[0]);dio.style.setProperty("--bio1",bg[1]);dio.style.setProperty("--bio2",bg[2]);
-  dio.style.setProperty("--bia",P[2]);dio.style.setProperty("--bis",P[0]);}
+  dio.style.setProperty("--bia",P[2]);dio.style.setProperty("--bis",P[0]);try{galaxy(dio);}catch(e){}}
  let E=document.getElementById("g16edge");if(E)E.remove();E=document.createElement("div");E.id="g16edge";E.dataset.biome=bm;bd.appendChild(E);
  const props=EDGE[bm]||EDGE.Plains,seed=(B.feat.reduce((a,v,i)=>a+v*(i+3),7))&1023;
  const place=(side,n)=>{for(let i=0;i<n;i++){const k=props[(seed+i*3+side.length)%props.length];const d=document.createElement("div");d.className="g16esc "+k;const t=TEX&&TEX["props/"+k];
-  const u=((seed+i*17+side.charCodeAt(0))%90)/100,sc=.55+.55*((seed+i*9)%10)/10;
-  d.style.cssText=`--u:${u};--sc:${sc};`;if(t)d.innerHTML=`<img src="${t}" alt="">`;else d.textContent=({pine:"🌲",oak:"🌳",bush:"🌿",reeds:"Reed",pillar:"🗿",ice:"🧊",crag:"⛰",rocks:"🪨"})[k]||"•";E.appendChild(d);d.dataset.side=side;}};
- place("n",4);place("s",3);place("w",3);place("e",3);
- // revive billboard props (were hidden in g16e)
- bd.querySelectorAll(".prop").forEach(p=>{p.classList.add("g16on");p.style.display="";});
+  const u=((seed+i*17+side.charCodeAt(0))%90)/100,sc=.7+.45*((seed+i*9)%10)/10;
+  d.style.cssText=`--u:${u};--sc:${sc};`;if(t)d.innerHTML=`<img src="${t}" alt="">`;else d.textContent=({pine:"🌲",oak:"🌳",bush:"🌿",reeds:"🌿",pillar:"🗿",crag:"⛰"})[k]||"•";E.appendChild(d);d.dataset.side=side;}};
+ place("n",3);place("s",2);place("w",2);place("e",2);
+ // revive billboard props; hide ground-only sprites that can't stand (rocks/ice)
+ bd.querySelectorAll(".prop").forEach(p=>{const flat=/rocks|ice/.test(p.className);if(flat){p.style.display="none";p.classList.remove("g16on");return;}
+  p.classList.add("g16on");p.style.display="";});
 }
 
 const ABB=new Map();
@@ -6134,7 +6159,7 @@ window.CB16J={force(b){if(!B)return;B.biome=b;B.map=B.map.map(()=>b);const bd=do
     if(!hb){hb=document.createElement("b");hb.className="g16hb";hb.innerHTML="<i></i>";L.appendChild(hb);M.set(t.id+"h",hb);}hb.classList.toggle("e",h.classList.contains("e"));
     hb.style.cssText=`left:${(q.left-d.left).toFixed(1)}px;top:${(q.top-d.top).toFixed(1)}px;width:${q.width.toFixed(1)}px`;const ci=hb.firstChild;ci.style.width=hi?hi.style.width:"100%";ci.style.background=hi?getComputedStyle(hi).backgroundColor:"";seen.add(t.id+"h");}});
   /* v16j: stamp tall obstacles into the figure layer so units draw behind them */
-  bd.querySelectorAll(".cell.g16f.kw .g16obs, .prop.g16on img").forEach((el,i)=>{
+  bd.querySelectorAll(".cell.g16f.kw .g16obs, .prop.g16on img, #g16edge .g16esc img").forEach((el,i)=>{
    const img=el.tagName==="IMG"?el:el.querySelector("img");const r=(img||el).getBoundingClientRect();if(!r.width||!r.height)return;
    const id="obs"+i+"_"+((el.closest(".cell")||el.closest(".prop")||el).dataset.i||el.dataset.x||i);
    let c=M.get(id);if(img&&img.complete&&img.naturalWidth){if(!c||c.tagName!=="IMG"){if(c)c.remove();c=document.createElement("img");c.decoding="async";L.appendChild(c);M.set(id,c);}if(c._src!==img.currentSrc){c.src=img.currentSrc;c._src=img.currentSrc;}
@@ -6161,6 +6186,7 @@ window.CB16J={force(b){if(!B)return;B.biome=b;B.map=B.map.map(()=>b);const bd=do
  setG("zApply",function(anim){const bd=document.getElementById("board");if(!bd)return;
   if(window.CBQ&&CBQ.busy&&!CAM.internal&&CAM.snap){Object.assign(ZM,CAM.snap);}/* QTE active: gestures don't move the camera */
   zClamp();const prev=bd.style.transform;bd.style.transition="none";bd.style.transform=T();clampPan(bd);
+  const gal=document.getElementById("g16gal");if(gal)gal.style.transform=`translate(${(-ZM.x*.04).toFixed(1)}px,${(-ZM.y*.04).toFixed(1)}px)`;
   if(anim){const fin=bd.style.transform;bd.style.transform=prev;void bd.offsetWidth;bd.style.transition="transform .45s cubic-bezier(.3,.8,.3,1)";bd.style.transform=fin;}
   CAM.snap={x:ZM.x,y:ZM.y,z:ZM.z};const rb=document.getElementById("zReset");if(rb){rb.textContent="⟲";rb.style.display=(Math.abs(ZM.z-CAM.fitZ)>.03||CAM.user)?"block":"none";}});
  wrap("focusUnit",o=>function(u){if(u)aim(u,null,900);});
