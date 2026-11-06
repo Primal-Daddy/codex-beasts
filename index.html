@@ -1013,7 +1013,7 @@ html:has(#s-battle.on),body:has(#s-battle.on){overflow:hidden;height:100%}
 .pv .qpv{font-size:11px;color:#e8c27a}
 
 /* ===== v16d "Grimguard" tactical board: iso diamond camera, raised stone tiles, cliffs, team rings, portrait HUD ===== */
-:root{--brt:rotateX(34deg);--bri:rotateX(-34deg)} /* v16i: no portrait stretch */
+:root{--brt:rotateX(34deg) rotateZ(44deg);--bri:rotateZ(-44deg) rotateX(-34deg)} /* v16k: 44deg left yaw like v16g diamond */
 #s-battle #dio{background:radial-gradient(ellipse 70% 45% at 50% 46%,#3a3a2c 0,#1f2119 45%,#0b0c09 80%,#050504 100%)!important}
 #s-battle #dio::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.55;
  background:radial-gradient(ellipse 22% 9% at 12% 22%,#2e2b22,#0000 70%),radial-gradient(ellipse 18% 8% at 88% 30%,#2e2b22,#0000 70%),radial-gradient(ellipse 26% 10% at 15% 80%,#26241c,#0000 70%),radial-gradient(ellipse 24% 9% at 86% 78%,#26241c,#0000 70%),
@@ -1169,7 +1169,7 @@ body.g16e #g16chip .t{flex:1;min-width:0}body.g16e #g16chip .b{margin:0!importan
 body.g16e.g16chipon #c16hint{display:none!important}
 @media (max-height:520px){body.g16e #g16chip{left:auto!important;right:8px!important;width:250px!important;bottom:calc(env(safe-area-inset-bottom) + 64px)!important}}
 /* v16h: square-on camera, mild perspective so near rows read larger (Grimguard-like) */
-body.g16e #s-battle #dio{perspective:1100px!important;perspective-origin:50% 25%!important}
+body.g16e #s-battle #dio{perspective:1400px!important;perspective-origin:50% 28%!important}/* v16k: room for 44deg diamond */
 @media (max-height:520px){body.g16e #s-battle #dio{perspective:1400px!important}}
 /* v16h crisp figures: no filters on the billboard chain (filters flatten 3D layers and rasterize them at low scale) */
 body.g16e #board .tok .fig .stage,body.g16e #board .tok .fig .fw,body.g16e #board .tok .fig .fw img,body.g16e #board .tok .fig.cv .fw{filter:none!important;-webkit-filter:none!important}
@@ -4399,8 +4399,8 @@ function renderTeam(){
 $("#goAI").onclick=()=>{if(!save.team.length)return toast("Pick at least 1 creature for Player 1");startBattle("ai");};
 $("#goPvP").onclick=()=>{if(!save.team.length||!save.team2.length)return toast("Both Player 1 and Player 2 need a team");startBattle("pvp");};
 // ---------- BATTLE ENGINE (pure) ----------
-let BRT="rotateX(34deg)";/* v16i: square-on true proportions; pan/zoom instead of stretch-to-fill */
-function camSet(){const sy=1;/* v16i: true proportions; board may exceed the screen, camera pans/zooms */BRT=`rotateX(34deg) scaleY(${sy})`;const R=document.documentElement.style;R.setProperty("--brt",BRT);R.setProperty("--bri",`scaleY(${(1/sy).toFixed(5)}) rotateX(-34deg)`);}
+let BRT="rotateX(34deg) rotateZ(44deg)";/* v16k: 34deg pitch + 44deg left yaw (diamond field) */
+function camSet(){const sy=1,yaw=44;/* v16k isometric yaw */BRT=`rotateX(34deg) rotateZ(${yaw}deg) scaleY(${sy})`;const R=document.documentElement.style;R.setProperty("--brt",BRT);R.setProperty("--bri",`scaleY(${(1/sy).toFixed(5)}) rotateZ(${-yaw}deg) rotateX(-34deg)`);}
 camSet();addEventListener("resize",()=>{const o=BRT;camSet();if(o!==BRT&&window.CB161&&CB161.fit)setTimeout(()=>CB161.fit(),50);});const SPX=[2,5,3,4];const N=8,BIO=Object.keys(BIOMES);
 function makeFeat(r,b){const P=FT[b].p,NN=N*N;
  const nf=(B,x,y)=>B.reduce((a,o)=>a+o.w*Math.exp(-((x-o.x)**2+(y-o.y)**2)/(2*o.s*o.s)),0);
