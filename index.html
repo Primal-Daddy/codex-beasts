@@ -1013,7 +1013,7 @@ html:has(#s-battle.on),body:has(#s-battle.on){overflow:hidden;height:100%}
 .pv .qpv{font-size:11px;color:#e8c27a}
 
 /* ===== v16d "Grimguard" tactical board: iso diamond camera, raised stone tiles, cliffs, team rings, portrait HUD ===== */
-:root{--brt:rotateX(34deg) scaleY(1.4);--bri:scaleY(.7142857) rotateX(-34deg)}
+:root{--brt:rotateX(34deg);--bri:rotateX(-34deg)} /* v16i: no portrait stretch */
 #s-battle #dio{background:radial-gradient(ellipse 70% 45% at 50% 46%,#3a3a2c 0,#1f2119 45%,#0b0c09 80%,#050504 100%)!important}
 #s-battle #dio::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.55;
  background:radial-gradient(ellipse 22% 9% at 12% 22%,#2e2b22,#0000 70%),radial-gradient(ellipse 18% 8% at 88% 30%,#2e2b22,#0000 70%),radial-gradient(ellipse 26% 10% at 15% 80%,#26241c,#0000 70%),radial-gradient(ellipse 24% 9% at 86% 78%,#26241c,#0000 70%),
@@ -1179,6 +1179,10 @@ body.g16figs #board .tok .fig .fw img{clip-path:inset(50%)}
 #g16figs .g16hb{position:absolute;z-index:999;height:4px;background:#120c08;border:1px solid #000;border-radius:2px;box-shadow:0 1px 2px #000}
 #g16figs .g16hb i{display:block;height:100%;border-radius:1px;background:#4cd04c}#g16figs .g16hb.e i{background:#e8392f!important}
 body.g16figs #board .tok .fig .hp{visibility:hidden}
+/* v16i: hide the whole in-board figure (no ghost); overlay draws it */
+body.g16figs #board .tok .fig .stage{visibility:hidden!important}
+body.g16e #dio,body.g16e #board{touch-action:none!important}
+body.g16e #dio #zReset{display:none;top:auto!important;bottom:calc(env(safe-area-inset-bottom) + 212px)!important;right:10px!important;width:38px;height:38px;border-radius:50%!important;font-size:20px!important;padding:0!important;background:#2a2016e6!important;border:1.5px solid #c9a35a!important;color:#f2e2bd!important;z-index:65!important}
 
 .itimg{position:relative;display:block;width:100%;height:100%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--rc) 28%,transparent) 0,transparent 68%)}.itimg::before{content:"";position:absolute;inset:3%;border-radius:50%;border:1.5px dashed var(--rc);opacity:.55}.itimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 3px #0006)}
 /* v16d mobile hardening */
@@ -4306,8 +4310,8 @@ function renderTeam(){
 $("#goAI").onclick=()=>{if(!save.team.length)return toast("Pick at least 1 creature for Player 1");startBattle("ai");};
 $("#goPvP").onclick=()=>{if(!save.team.length||!save.team2.length)return toast("Both Player 1 and Player 2 need a team");startBattle("pvp");};
 // ---------- BATTLE ENGINE (pure) ----------
-let BRT="rotateX(34deg) scaleY(1.4)";/* v16h: square-on; portrait stretches depth so the arena fills the tall screen */
-function camSet(){const port=innerHeight>innerWidth*1.1,sy=port?1.4:1;BRT=`rotateX(34deg) scaleY(${sy})`;const R=document.documentElement.style;R.setProperty("--brt",BRT);R.setProperty("--bri",`scaleY(${(1/sy).toFixed(5)}) rotateX(-34deg)`);}
+let BRT="rotateX(34deg)";/* v16i: square-on true proportions; pan/zoom instead of stretch-to-fill */
+function camSet(){const sy=1;/* v16i: true proportions; board may exceed the screen, camera pans/zooms */BRT=`rotateX(34deg) scaleY(${sy})`;const R=document.documentElement.style;R.setProperty("--brt",BRT);R.setProperty("--bri",`scaleY(${(1/sy).toFixed(5)}) rotateX(-34deg)`);}
 camSet();addEventListener("resize",()=>{const o=BRT;camSet();if(o!==BRT&&window.CB161&&CB161.fit)setTimeout(()=>CB161.fit(),50);});const SPX=[2,5,3,4];const N=8,BIO=Object.keys(BIOMES);
 function makeFeat(r,b){const P=FT[b].p,NN=N*N;
  const nf=(B,x,y)=>B.reduce((a,o)=>a+o.w*Math.exp(-((x-o.x)**2+(y-o.y)**2)/(2*o.s*o.s)),0);
@@ -4480,7 +4484,7 @@ function initZoom(){const dio=$("#dio");if(!dio||dio._z)return;dio._z=1;const pt
    ZM.fit=0;zoomAt(st.z*d1/Math.max(20,d0),m0.x,m0.y,st);ZM.x+=m1.x-m0.x;ZM.y+=m1.y-m0.y;zApply(false);}});
  const up=e=>{if(!pts.has(e.pointerId))return;pts.delete(e.pointerId);snap();};
  window.addEventListener("pointerup",up);window.addEventListener("pointercancel",up);
- dio.addEventListener("click",e=>{if(dragged){e.stopPropagation();e.preventDefault();dragged=false;}},true);
+ dio.addEventListener("click",e=>{if(dragged){/* only suppress tile taps; HUD/QTE/buttons still fire */if(!e.target.closest("button,a,input,#g16cards,#g16chip,#g16hud,#zReset,.qte,.qring,.qcharge")){e.stopPropagation();e.preventDefault();}dragged=false;}},true);
  dio.addEventListener("wheel",e=>{e.preventDefault();ZM.fit=0;zoomAt(ZM.z*Math.exp(-e.deltaY*.0018),e.clientX,e.clientY);zApply(false);},{passive:false});
  $("#zReset").addEventListener("click",e=>{e.stopPropagation();ZM.fit=0;ZM.z=1;ZM.x=0;ZM.y=0;zApply(true);});}
 
@@ -6006,7 +6010,7 @@ window.CB16E={arena,kinds,TPL,chip};
 /* v16h: screen-space figure overlay. Each unit's sprite is redrawn in a flat layer at native DPR, exactly over the
    (billboarded, hence screen-aligned) original <img> rect, so lunges/hits/moves follow; original is clipped away. */
 (function(){let L=null,M=new Map(),on=false;
- const op=e=>{let o=1;for(let n=e;n&&n.id!=="board";n=n.parentElement){const c=getComputedStyle(n);o*=+c.opacity;if(c.visibility==="hidden"||c.display==="none")return 0;}return o;};
+ const op=e=>{let o=1;for(let n=e;n&&n.id!=="board";n=n.parentElement){const c=getComputedStyle(n);o*=+c.opacity;if(c.display==="none")return 0;}return o;};
  function tick(){if(!on)return;const bd=document.getElementById("board"),dio=document.getElementById("dio");
   if(!bd||!dio||!document.body.classList.contains("g16e")||!document.querySelector("#s-battle.on")){if(L)L.style.display="none";requestAnimationFrame(tick);return;}
   if(!L||!L.isConnected){L=document.createElement("div");L.id="g16figs";dio.appendChild(L);M.clear();}L.style.display="";document.body.classList.add("g16figs");
@@ -6023,5 +6027,47 @@ window.CB16E={arena,kinds,TPL,chip};
   list.sort((a,b)=>a[0]-b[0]).forEach(([,c],i)=>{c.style.zIndex=i+1;});requestAnimationFrame(tick);}
  window.CB16FIG={start(){if(!on){on=true;requestAnimationFrame(tick);}},stop(){on=false;document.body.classList.remove("g16figs");L&&L.remove();}};
  CB16FIG.start();})();
+
+/* v16i camera: drag-pan / pinch / wheel with clamps; auto-focus active unit; follow enemy turns and frame attacks. */
+(function(){const wrap=(name,f)=>{const o=window[name];if(typeof o!=="function")return;const w=f(o);window[name]=w;try{eval(name+"=w");}catch(e){}};const setG=(n,f)=>{window[n]=f;try{eval(n+"=f");}catch(e){}};const CAM={fitZ:1,goal:null,until:0,last:null,user:0,internal:0,snap:null};window.CBCAM=CAM;
+ const rm=()=>matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+ const lim=()=>[CAM.fitZ,CAM.fitZ*2.5];
+ const T=()=>`translate(${ZM.x}px,${ZM.y}px) scale(${ZM.z}) ${BRT}`;
+ setG("zoomAt",function(z2,px,py,base){base=base||{...ZM};const O=zOrigin(),[a,b]=ZM.fit?[.3,4]:lim();const k=Math.min(b,Math.max(a,z2))/base.z;ZM.z=base.z*k;ZM.x=px-O.x-k*(px-O.x-base.x);ZM.y=py-O.y-k*(py-O.y-base.y);});
+ setG("zClamp",function(){const[a,b]=lim();ZM.z=Math.min(b,Math.max(a,ZM.z));});
+ function clampPan(bd){/* iterate: perspective makes one screen-space correction insufficient */
+  for(let i=0;i<6;i++){const r=CB161.box(),A=CB161.area();if(!r)return;let dx=0,dy=0;
+   if(r.r-r.l<=A.r-A.l){dx=(A.l+A.r)/2-(r.l+r.r)/2;}else{if(r.l>A.l+0.5)dx=A.l-r.l;else if(r.r<A.r-0.5)dx=A.r-r.r;}
+   if(r.b-r.t<=A.b-A.t){dy=(A.t+A.b)/2-(r.t+r.b)/2;}else{if(r.t>A.t+0.5)dy=A.t-r.t;else if(r.b<A.b-0.5)dy=A.b-r.b;}
+   if(!dx&&!dy)return;ZM.x+=dx;ZM.y+=dy;bd.style.transform=T();}}
+ setG("zApply",function(anim){const bd=document.getElementById("board");if(!bd)return;
+  if(window.CBQ&&CBQ.busy&&!CAM.internal&&CAM.snap){Object.assign(ZM,CAM.snap);}/* QTE active: gestures don't move the camera */
+  zClamp();const prev=bd.style.transform;bd.style.transition="none";bd.style.transform=T();clampPan(bd);
+  if(anim){const fin=bd.style.transform;bd.style.transform=prev;void bd.offsetWidth;bd.style.transition="transform .45s cubic-bezier(.3,.8,.3,1)";bd.style.transform=fin;}
+  CAM.snap={x:ZM.x,y:ZM.y,z:ZM.z};const rb=document.getElementById("zReset");if(rb){rb.textContent="⟲";rb.style.display=(Math.abs(ZM.z-CAM.fitZ)>.03||CAM.user)?"block":"none";}});
+ wrap("focusUnit",o=>function(u){if(u)aim(u,null,900);});
+ const fitO=CB161.fit;CB161.fit=function(a){ZM.fit=1;const r=fitO.apply(this,arguments);CAM.fitZ=ZM.z;ZM.fit=0;CAM.user=0;CAM.snap={x:ZM.x,y:ZM.y,z:ZM.z};return r;};
+ function aim(u,t,ms,z){CAM.goal={u,t,z:z||null};CAM.until=performance.now()+ms;CAM.user=0;}
+ window.CBCAM.aim=aim;
+ wrap("attackSeq",o=>function(u,a,t){try{if(t&&t!==u)aim(u,t,1800);}catch(e){}return o.apply(this,arguments);});
+ const dio=()=>document.getElementById("dio");
+ document.addEventListener("pointerdown",e=>{const d=dio();if(d&&d.contains(e.target)&&!(window.CBQ&&CBQ.busy)){CAM.goal=null;CAM.user=1;}},true);
+ document.addEventListener("wheel",e=>{const d=dio();if(d&&d.contains(e.target)){CAM.goal=null;CAM.user=1;}},{capture:true,passive:true});
+ document.addEventListener("click",e=>{if(e.target&&e.target.id==="zReset"){e.stopImmediatePropagation();e.preventDefault();CB161.fit(true);}},true);
+ function ctr(u){const t=document.querySelector("#u"+u.id+" .side")||document.querySelector("#u"+u.id);if(!t)return null;const r=t.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};}
+ function tick(){requestAnimationFrame(tick);try{
+  if(typeof B==="undefined"||!B||!document.querySelector("#s-battle.on")||!document.body.classList.contains("g16e"))return;
+  const u=cur(B);if(u&&u!==CAM.last&&!B.over){CAM.last=u;const mine=!u.side||B.mode==="pvp";aim(u,null,mine?1200:60000,mine?ZM.z:CAM.fitZ*1.35);}
+  if(CAM.last&&CAM.goal&&CAM.goal.u.side&&B.mode!=="pvp"&&cur(B)!==CAM.goal.u&&!CAM.goal.t)CAM.goal=null;
+  const g=CAM.goal;if(!g||performance.now()>CAM.until||!g.u.alive&&!g.t){CAM.goal=null;return;}
+  const A=CB161.area(),C={x:(A.l+A.r)/2,y:(A.t+A.b)/2+12};let P=ctr(g.u);if(!P)return;let z1=g.z||ZM.z;
+  if(g.t){const Q=ctr(g.t);if(Q){const sep=Math.hypot(P.x-Q.x,P.y-Q.y)/ZM.z;P={x:(P.x+Q.x)/2,y:(P.y+Q.y)/2};z1=Math.min(CAM.fitZ*1.9,Math.max(CAM.fitZ*1.2,(A.r-A.l)*.5/Math.max(1,sep)));}}
+  const O=zOrigin(),z0=ZM.z,n={x:O.x+(P.x-O.x-ZM.x)/z0,y:O.y+(P.y-O.y-ZM.y)/z0};const[a,b]=lim();z1=Math.min(b,Math.max(a,z1));
+  const tx=C.x-O.x-z1*(n.x-O.x),ty=C.y-O.y-z1*(n.y-O.y),k=rm()?1:.2;
+  if(Math.abs(tx-ZM.x)+Math.abs(ty-ZM.y)+Math.abs(z1-ZM.z)*100<.5)return;
+  ZM.x+=(tx-ZM.x)*k;ZM.y+=(ty-ZM.y)*k;ZM.z+=(z1-ZM.z)*k;CAM.internal=1;zApply(false);CAM.internal=0;}catch(e){}}
+ requestAnimationFrame(tick);})();
+
+(function(){let fb=null,t0=0;addEventListener("resize",()=>{fb=null;});setInterval(()=>{try{const on=document.querySelector("#s-battle.on");if(!on){fb=null;return;}const b=CB.getB&&CB.getB();if(b&&b!==fb){if(!t0)t0=Date.now();if(Date.now()-t0>350){fb=b;t0=0;CB161.fit(false);}}}catch(e){}},120);})();
 
 </script></body></html>
