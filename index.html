@@ -1282,6 +1282,14 @@ body.g16e #s-battle #dio::after{content:"";position:absolute;inset:0;pointer-eve
 #g16figs .g16obx{position:absolute;left:0;top:0;transform-origin:0 0;border-radius:4px;background:linear-gradient(#0000,#0006);pointer-events:none}
 #g16figs img{filter:drop-shadow(0 0 .6px #000c)}
 
+#g17lvl{position:fixed;left:50%;top:18%;transform:translate(-50%,-20px);z-index:12000;pointer-events:none;opacity:0;
+ background:linear-gradient(180deg,#2a1848ee,#12081cee);border:2px solid #e8c36a;border-radius:12px;padding:10px 16px;color:#f6e6b8;
+ font:700 14px Georgia,serif;text-align:center;box-shadow:0 8px 28px #000a;transition:opacity .25s,transform .25s;max-width:86vw}
+#g17lvl.on{opacity:1;transform:translate(-50%,0)}
+#g17lvl em{color:#ffd77a;font-style:normal}
+#g17lvl .g{display:flex;flex-wrap:wrap;gap:4px 8px;justify-content:center;margin-top:6px;font:600 12px system-ui,sans-serif;color:#b8f0c8}
+#g17lvl .g span{background:#0006;border-radius:8px;padding:2px 7px}
+
 .itimg{position:relative;display:block;width:100%;height:100%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--rc) 28%,transparent) 0,transparent 68%)}.itimg::before{content:"";position:absolute;inset:3%;border-radius:50%;border:1.5px dashed var(--rc);opacity:.55}.itimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 3px #0006)}
 /* v16d mobile hardening */
 #inGate{position:fixed;inset:0;z-index:4000;background:radial-gradient(ellipse at 50% 40%,#2a1c3a,#05030a 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#f2e2bd;font-family:Georgia,serif;text-align:center;transition:opacity .25s;cursor:pointer;touch-action:manipulation}
@@ -4258,13 +4266,13 @@ function lore(c){const r=rngFrom(c.ri*7919+131),pk=a=>a[Math.floor(r()*a.length)
 // ---------- v3 BOOK ----------
 const CAPS='<i class="cap tl"></i><i class="cap tr"></i><i class="cap bl"></i><i class="cap br"></i>';
 const DIV='<svg class="ink-div" viewBox="0 0 200 14" preserveAspectRatio="none"><path d="M2 7 Q40 5 82 7 M118 7 Q160 9 198 7" stroke="#3a2412" stroke-width="1.2" fill="none"/><path d="M84 7 q8 -8 16 0 q8 8 16 0" stroke="#3a2412" stroke-width="1.3" fill="none"/><circle cx="100" cy="7" r="2.2" fill="#3a2412"/></svg>';
-function inkStats(c){const rows=[["HP",c.hp,200],["Power",c.pow,60],["Defense",c.def,60],["Speed",c.spd,25],["Essence",c.ess,60],["Ess. Def",c.edef,60]];
+function inkStats(c){const rows=[["HP",c.hp,400],["Power",c.pow,160],["Defense",c.def,160],["Speed",c.spd,120],["Essence",c.ess,160],["Ess. Def",c.edef,160]];
  return rows.map(r=>`<div class="istat"><span class="k">${r[0]}</span><div class="ibar"><i style="width:${Math.min(100,r[1]/r[2]*100)}%"></i></div><span class="v">${r[1]}</span></div>`).join("")+`<div class="istat"><span class="k">Move</span><span class="hand" style="flex:1">${c.move} tiles${c.float?" · flies over terrain":""}</span></div>`;}
 function inkAbs(c,ctl){return `<div class="ab"><b>Strike</b><br><span class="d">Physical · range 1 · Power vs Defense</span></div>`+c.ab.map(a=>a.locked?`<div class="ab locked"><b>🔒 ${a.n}</b><br><span class="d">Unlocks when this hatchling evolves (Lv ${BABY_CFG.evoLevel} + Evolution Rune).</span></div>`:`<div class="ab"><b>${a.n}</b> <span class="pip">${pips(a.rank)}</span> <span class="no">Rank ${a.rank}</span><br>${a.t==="ess"?c.el+" Essence":"Physical"} · range ${a.r} · ×${a.pw} · cooldown ${a.cd}${a.heal?" · heals 50%":""}<br><span class="d">${a.d}${a.fx?` <b style="font-size:12px">${FXD[a.fx]}</b>`:""}</span><div class="nx">Next: ${nextRankText(a)}</div>${ctl&&c.sp>0&&a.rank<MAXR?`<button class="stamp rk" data-k="${a.k}">Spend 1 Skill Point → Rank ${a.rank+1}</button>`:""}</div>`).join("");}
 function pageHtml(c,ctl,tab){const L=lore(c);
  let h=`<div class="seal" style="--rc:${RAR[c.rar].c}">${c.rarity[0]}<small>${c.rarity}</small></div><div class="no">Bestiary entry No. ${String(c.ri+1).padStart(3,"0")} · ${c.origin}</div><h3>${c.name}</h3><div class="hand">${ELEMENTS[c.el].ic} ${c.el} · ${(c.cv?CV[c.cv].n:c.variant)} variant · Level ${c.lvl}</div>`;
  h+=`<div class="plate">${fig(c)}<div class="cap2">fig. ${c.ri+1} — ${c.base}, ${(c.cv?CV[c.cv].n:c.variant).toLowerCase()} specimen</div></div>`+DIV;
- if(tab==="stats")h+=`<div class="no" style="text-align:center">Level ${c.lvl} · ${c.xp%100}/100 XP · code ${c.code}</div>${inkStats(c)}<div class="hand" style="margin-top:6px;text-align:center">Stats grow only by levelling with XP.</div>`;
+ if(tab==="stats")h+=`<div class="no" style="text-align:center">Level ${c.lvl} · ${c.xp}/${(window.CB17?CB17.xpToNext(c.lvl):100)} XP · code ${c.code}</div>${inkStats(c)}<div class="hand" style="margin-top:6px;text-align:center">Pokemon-style growth: base + IVs × level. Hatchlings use 70% bases until evolution (Lv 10 + Evolution Rune).</div>`;
  else if(tab==="ab")h+=(c.dom||domOf(c)?`<div class="domain-ab"><div class="dh">${BICON[domOf(c)]} Domain — ${BNAME[domOf(c)]} <span class="pv">passive</span></div><div class="dd">At the start of battle this creature claims the field: the whole map becomes <b>${domOf(c)}</b>. If a rival also invokes a Domain, a contested roll weighted by Essence decides whose land it is.</div></div>`:"")+`<div style="text-align:center">${c.sp?`<span class="sp">${c.sp} Skill Point${c.sp>1?"s":""} to spend</span>`:`<span class="hand">No Skill Points. Fuse a duplicate ${c.base} to earn one.</span>`}</div>${inkAbs(c,ctl)}`;
  else h+=lorePage(c);
  return h;}
@@ -4279,7 +4287,7 @@ let save;try{save=JSON.parse(localStorage.getItem(SAVE_KEY))}catch(e){}
 if(!save||!save.col)save={col:{},order:[],team:[],team2:[]};
 save.order=save.order||Object.keys(save.col);save.team=save.team||[];save.team2=save.team2||[];Object.values(save.col).forEach(s=>{s.lvl=s.lvl||1;s.xp=s.xp||0;s.rk=s.rk||{a1:1,a2:1};s.sp=s.sp||0;});save.v=2;
 const _persist=()=>{try{localStorage.setItem(SAVE_KEY,JSON.stringify(save))}catch(e){}};const persist=()=>{_persist();msLvlScan();};
-const owned=code=>{const s=save.col[code];if(!s)return null;const c=gen(code,s.lvl,s.xp,s.rk,s.rup);c.sp=s.sp||0;c.cv=s.cv||null;c.cvt=s.cvt||"";if(s.baby){c.baby=true;c.name=babyName(c);c.ab[1]={...c.ab[1],locked:true};}if(s.title){c.name=s.title+" "+c.name;c.title=s.title;}return c;};
+const owned=code=>{const s=save.col[code];if(!s)return null;const c=gen(code,s.lvl,s.xp,s.rk,s.rup,s.baby);c.sp=s.sp||0;c.cv=s.cv||null;c.cvt=s.cvt||"";if(s.baby){c.baby=true;c.name=babyName(c);c.ab[1]={...c.ab[1],locked:true};}if(s.title){c.name=s.title+" "+c.name;c.title=s.title;}return c;};
 const copiesOf=c=>save.order.filter(k=>k!==c.code&&save.col[k]&&gen(k).ri===c.ri);
 function fuse(keep,consume){const K=save.col[keep],C=save.col[consume];if(!K||!C||keep===consume||gen(keep).ri!==gen(consume).ri)return false;delete save.col[consume];save.order=save.order.filter(k=>k!==consume);save.team=save.team.filter(k=>k!==consume);save.team2=save.team2.filter(k=>k!==consume);K.sp=(K.sp||0)+1;persist();mEvent("fuse");return true;}
 function rankUp(code,k){const s=save.col[code];if(!s||!(s.sp>0)||(s.rk[k]||1)>=MAXR)return false;s.rk[k]=(s.rk[k]||1)+1;s.sp--;persist();return true;}
@@ -4290,7 +4298,7 @@ function addCode(raw,src){
  if(energy()<=0){toast("⚡ Scanner depleted. Refresh with a Relic Crystal or wait for midnight.");renderEnergy();return false;}
  save.energy.n--;const c0=gen(code);
  if(save.order.length>=capC()){persist();showReveal(c0,false,src);codexFull(c0);playReveal(c0,{kind:"full"});renderEnergy();return false;}
- save.col[code]={lvl:1,xp:0,t:Date.now(),rk:{a1:1,a2:1},sp:0,baby:1};{const S=save.col[code],x=dnCtx();if(x.events.some(e=>e.bday)&&c0.rar<4&&Math.random()<DN.bdayRarityUp)S.rup=1;const v=(window.CB12&&CB12.forceNext)||rollVariant(gen(code,1,0,null,S.rup),x);if(window.CB12)CB12.forceNext=null;if(v){S.cv=v.cv;S.cvt=v.th;wdCapture(v.cv);const T=save.tracer;if(T){T.seenV=T.seenV||[];const k=c0.base+'|'+v.cv;if(!T.seenV.includes(k))T.seenV.push(k);}}}if(save.lure){save.col[code].title=ITEMS[save.lure].title;save.lure=null;}save.order.push(code);persist();
+ save.col[code]={lvl:(window.CB17?CB17.START_LVL(c0.rar):5),xp:0,t:Date.now(),rk:{a1:1,a2:1},sp:0,baby:1,v17:1};{const S=save.col[code],x=dnCtx();if(x.events.some(e=>e.bday)&&c0.rar<4&&Math.random()<DN.bdayRarityUp)S.rup=1;const v=(window.CB12&&CB12.forceNext)||rollVariant(gen(code,1,0,null,S.rup),x);if(window.CB12)CB12.forceNext=null;if(v){S.cv=v.cv;S.cvt=v.th;wdCapture(v.cv);const T=save.tracer;if(T){T.seenV=T.seenV||[];const k=c0.base+'|'+v.cv;if(!T.seenV.includes(k))T.seenV.push(k);}}}if(save.lure){save.col[code].title=ITEMS[save.lure].title;save.lure=null;}save.order.push(code);persist();
  showReveal(owned(code),false,src);renderEnergy();{const nb0=!save.tracer.seen.includes(c0.base);playReveal(owned(code),{kind:"new",newSpecies:nb0,fuse:copiesOf(c0).length>0});}
  save.tracer.shards+=SHARD_SRC.scan;toast(`💠 +${SHARD_SRC.scan} Relic Shards · scan`);
  const T=save.tracer,nb=!T.seen.includes(c0.base);if(nb)T.seen.push(c0.base);addTracerXP(XP_SRC.scan,"New barcode");mEvent("scan");if(nb)mEvent("species");if(save.col[code]&&save.col[code].cv)mEvent("variant");if(nb)addTracerXP(XP_SRC.species,"New species: "+c0.base);
@@ -4321,13 +4329,13 @@ function pumpToast(){clearTimeout(TQ.t);TQ.t=0;if(!TQ.length)return;if(uiBusy())
  while(TQ.length&&document.querySelectorAll("#toasts .toast:not(.tout)").length<3){const o=TQ.shift(),t=document.createElement("div");t.className="toast";t.innerHTML=o.m;if(o.xp){t.dataset.xp=o.xp;t.dataset.n=o.n;}toastBox().appendChild(t);t._t=setTimeout(()=>tGone(t),o.ms);}
  if(TQ.length)TQ.t=setTimeout(pumpToast,300);}
 const pill=(t,c,fg="#111")=>`<span class="pill" style="background:${c};color:${fg}">${t}</span>`;
-function statBars(c){const rows=[["HP",c.hp,200,"#5f5"],["Power",c.pow,60,"#ff7a5c"],["Defense",c.def,60,"#ffb35c"],["Speed",c.spd,25,"#6bf0ff"],["Essence",c.ess,60,"#c37bff"],["Ess. Def",c.edef,60,"#7b9bff"]];
+function statBars(c){const rows=[["HP",c.hp,400,"#5f5"],["Power",c.pow,160,"#ff7a5c"],["Defense",c.def,160,"#ffb35c"],["Speed",c.spd,120,"#6bf0ff"],["Essence",c.ess,160,"#c37bff"],["Ess. Def",c.edef,160,"#7b9bff"]];
  return rows.map(r=>`<div class="stat"><span>${r[0]}</span><div class="bar"><i style="width:${Math.min(100,r[1]/r[2]*100)}%;background:${r[3]}"></i></div><span>${r[1]}</span></div>`).join("")+`<div class="stat"><span>Move</span><span style="flex:1;color:var(--ink)">${c.move} tiles${c.float?" · flies over terrain":""}</span></div>`;}
 function abHtml(c,ctl){return `<div class="ab"><b>Strike</b> · Physical · range 1 · Power vs Defense</div>`+c.ab.map(a=>a.locked?`<div class="ab locked"><b>🔒 ${a.n}</b><br><span class="d">Unlocks when this hatchling evolves (Lv ${BABY_CFG.evoLevel} + Evolution Rune).</span></div>`:`<div class="ab"><b>${a.n}</b> ${pips(a.rank)} <span style="color:var(--dim)">R${a.rank}</span><br>${a.t==="ess"?c.el+" Essence":"Physical"} · range ${a.r} · x${a.pw} · cooldown ${a.cd}${a.heal?" · heals 50%":""}<br><span style="color:var(--dim)">${a.d}${a.fx?` <b style="color:#ff9d5c">${FXD[a.fx]}</b>`:""}</span><div style="font-size:11px;color:#9fd8ff;margin-top:3px">Next: ${nextRankText(a)}</div>${ctl&&c.sp>0&&a.rank<MAXR?`<button class="pri rk" data-k="${a.k}" style="margin-top:5px;padding:6px 10px;font-size:12px">Spend 1 Skill Point → Rank ${a.rank+1}</button>`:""}</div>`).join("");}
 function cardHtml(c,extra=""){return `<div class="card${extra}${c.cv?" vcard"+(c.cv==="Prism"?" vp":""):""}" data-code="${encodeURIComponent(c.code)}" style="--rc:${RAR[c.rar].c}${c.cv?`;--vc:${CV[c.cv].c};--vc2:${CV[c.cv].c2||CV[c.cv].c}`:""}">${fig(c)}${cvBadge(c)}<i class="wax-seal" title="${c.rarity}">${c.rarity[0]}</i><span class="lv">Lv${c.lvl}</span><div class="nm">${c.name}</div><div class="mt">${c.cv?`<b class="vnm">${CV[c.cv].n}</b> · `:""}${ELEMENTS[c.el].ic} ${c.el} · ${c.rarity}</div></div>`;}
 function detailHtml(c,ctl){return `<div style="border-radius:14px;overflow:hidden;max-width:240px;margin:0 auto">${art(c)}</div>
 <h2 style="text-align:center;margin-bottom:2px">${c.name}</h2><div style="text-align:center">${pill(c.rarity,RAR[c.rar].c)}${pill(ELEMENTS[c.el].ic+" "+c.el,ELEMENTS[c.el].c)}${pill(c.origin,"#ddd")}${pill(c.variant+" variant","#3d3460","#fff")}</div>
-<div style="text-align:center;font-size:12px;color:var(--dim);margin:4px 0">Level ${c.lvl} · ${c.xp%100}/100 XP · code ${c.code}${c.sp?` · <b style="color:var(--gold)">${c.sp} Skill Point${c.sp>1?"s":""}</b>`:""}</div>${statBars(c)}${abHtml(c,ctl)}`;}
+<div style="text-align:center;font-size:12px;color:var(--dim);margin:4px 0">Level ${c.lvl} · ${c.xp}/${(window.CB17?CB17.xpToNext(c.lvl):100)} XP · code ${c.code}${c.sp?` · <b style="color:var(--gold)">${c.sp} Skill Point${c.sp>1?"s":""}</b>`:""}</div>${statBars(c)}${abHtml(c,ctl)}`;}
 // ink & parchment confirm dialog (replaces native confirm())
 function inkConfirm(title,body,yes,fn){const m=document.createElement("div");m.className="modal";m.id="inkConf";
  m.innerHTML=`<div class="box" style="text-align:center"><h2 style="margin-top:4px">${title}</h2><span class="ink-divider"></span><div style="font-style:italic;margin-bottom:10px">${body||""}</div><div class="row"><button id="icNo">Stay</button><button class="pri" id="icYes">${yes||"Confirm"}</button></div></div>`;
@@ -4369,7 +4377,7 @@ $("#camBtn").onclick=()=>stream?stopCam():startCam();
 $("#manBtn").onclick=()=>{const v=$("#manual").value;if(!v.trim())return toast("Type a barcode first");addCode(v,"manual");$("#manual").value="";};
 $("#manual").onkeydown=e=>{if(e.key==="Enter")$("#manBtn").click()};
 const DEMO=["012345678905","5901234123457","96385074","CODEX-BEAST-01","4006381333931","036000291452","9780141036144","https://example.com/totem"];
-$("#demoBtn").onclick=()=>{let n=0;DEMO.forEach(d=>{const c=normCode(d);if(!save.col[c]){save.col[c]={lvl:1,xp:0,t:Date.now()+n,rk:{a1:1,a2:1},sp:0};save.order.push(c);n++;}});
+$("#demoBtn").onclick=()=>{let n=0;DEMO.forEach(d=>{const c=normCode(d);if(!save.col[c]){save.col[c]={lvl:(window.CB17?CB17.START_LVL(gen(c).rar):5),xp:0,t:Date.now()+n,rk:{a1:1,a2:1},sp:0,baby:1,v17:1};save.order.push(c);n++;}});
  if(save.team.length===0)save.team=DEMO.slice(0,4).map(normCode);if(save.team2.length===0)save.team2=DEMO.slice(4,8).map(normCode);persist();if(n)playReveal(owned(normCode(DEMO[0])),{kind:"new",newSpecies:true});toast(n?`Added ${n} demo creatures!`:"Demo creatures already added");show("col");};
 // ---------- COLLECTION ----------
 RAR.forEach(r=>$("#fRar").insertAdjacentHTML("beforeend",`<option>${r.n}</option>`));Object.keys(ELEMENTS).forEach(e=>$("#fEl").insertAdjacentHTML("beforeend",`<option>${e}</option>`));
@@ -4783,8 +4791,8 @@ function aiAnimate(u){let p=aiPlan(B,u);if((!p||!p.a)&&B.stash){const R=reachabl
   panelInfo(u,`Used <b>${p.a.n}</b> on ${p.t.c.base}: ${res.dmg} damage${res.eff?" · "+res.eff:""}${res.kill?" — KO!":""}${q.g==="perfect"?" · Countered for "+ctr:q.g==="good"?" · Guarded":""}`);attackSeq(u,p.a,p.t,res,ex=>setTimeout(()=>{nextTurn(B);beginTurn()},TS(800)+ex));};
   if(window.CBQ&&B.mode==="ai"&&p.t.side===0)CBQ.guard(u,p.t,p.a,run);else run({m:1,g:"auto"});}else{nextTurn(B);beginTurn();}},TS(380));}
 function endBattle(){syncTokens();clearHi();if(B.mode==="net")return netEnd();const w=B.winner;let msg,rew="";
- if(B.mode==="ai"){msg=w===0?"Victory!":"Defeat";if(w===0){mEvent("win");const ups=[];save.team.forEach(code=>{const s=save.col[code];if(!s)return;const before=s.lvl;s.xp+=50;s.lvl=Math.min(10,1+Math.floor(s.xp/100));if(s.lvl>before)ups.push(gen(code).base+" → Lv"+s.lvl);});save.wins=(save.wins||0)+1;persist();setTimeout(()=>{save.tracer.shards+=SHARD_SRC.win;toast(`💠 +${SHARD_SRC.win} Relic Shards · victory`);addTracerXP(XP_SRC.win,"Battle won");},300);rew=`<div class="sub" style="text-align:center">Each team creature gained 50 XP. Tracer: +${XP_SRC.win} XP, +${SHARD_SRC.win} 💠${ups.length?"<br><b style='color:var(--gold)'>Level up! "+ups.join(", ")+"</b>":""}</div>`;}
-  else{save.team.forEach(code=>{const s=save.col[code];if(s){s.xp+=15;s.lvl=Math.min(10,1+Math.floor(s.xp/100));}});persist();rew=`<div class="sub" style="text-align:center">Your creatures gained 15 XP for trying.</div>`;setTimeout(()=>{save.tracer.shards+=SHARD_SRC.loss;toast(`💠 +${SHARD_SRC.loss} Relic Shards · participation`);addTracerXP(XP_SRC.loss,"Battle fought");},300);}}
+ if(B.mode==="ai"){msg=w===0?"Victory!":"Defeat";if(w===0){mEvent("win");const ups=[];const avgE=B.units.filter(u=>u.side===1).reduce((a,u)=>a+(u.c.lvl||5),0)/Math.max(1,B.units.filter(u=>u.side===1).length);const gx=window.CB17?CB17.battleXP(true,avgE):50;save.team.forEach(code=>{const s=save.col[code];if(!s)return;const r=CB17?CB17.grantCreatureXP(code,gx):null;if(r&&r.gained)ups.push(gen(code).base+" → Lv"+s.lvl);});save.wins=(save.wins||0)+1;persist();setTimeout(()=>{save.tracer.shards+=SHARD_SRC.win;toast(`💠 +${SHARD_SRC.win} Relic Shards · victory`);addTracerXP(XP_SRC.win,"Battle won");},300);rew=`<div class="sub" style="text-align:center">Each team creature gained XP. Tracer: +${XP_SRC.win} XP, +${SHARD_SRC.win} 💠${ups.length?"<br><b style='color:var(--gold)'>Level up! "+ups.join(", ")+"</b>":""}</div>`;}
+  else{const avgE2=B.units.filter(u=>u.side===1).reduce((a,u)=>a+(u.c.lvl||5),0)/Math.max(1,B.units.filter(u=>u.side===1).length);const gx2=window.CB17?CB17.battleXP(false,avgE2):15;save.team.forEach(code=>{if(save.col[code]&&CB17)CB17.grantCreatureXP(code,gx2);});persist();rew=`<div class="sub" style="text-align:center">Your creatures gained some XP for trying.</div>`;setTimeout(()=>{save.tracer.shards+=SHARD_SRC.loss;toast(`💠 +${SHARD_SRC.loss} Relic Shards · participation`);addTracerXP(XP_SRC.loss,"Battle fought");},300);}}
  else msg=(w===0?"Player 1":"Player 2")+" wins!";
  if(B.timeout)msg+=" (on remaining HP)";
  const m=modal(`<h2 style="text-align:center;font-size:26px">${msg}</h2>${rew}<button class="pri" style="width:100%;margin-top:8px" id="again">Back to Team</button>`);m.querySelector("#again").onclick=()=>{m.remove();B=null;show("team")};}
@@ -4956,7 +4964,7 @@ function useOutside(k){const it=ITEMS[k];
  const L=allOwned();if(!L.length)return toast("No creatures to use it on.");
  const m=modal(`<div class="page"><h3 style="text-align:center;margin:0">Use ${it.n} on…</h3><div class="grid">${L.map(c=>cardHtml(c)).join("")}</div></div>`,true);
  m.querySelectorAll(".card").forEach(e=>e.onclick=()=>{const code=decodeURIComponent(e.dataset.code),s=save.col[code];if(!s)return;m.remove();
-  if(it.cat==="tonic"){if(s.lvl>=10)return toast("Already at max level");takeItem(k);const b=s.lvl;s.xp+=it.xp;s.lvl=Math.min(10,1+Math.floor(s.xp/100));persist();toast(`+${it.xp} XP${s.lvl>b?" · Level up! Lv"+s.lvl:""}`);}
+  if(it.cat==="tonic"){if(s.lvl>=(window.CB17?CB17.LVL_CAP:100))return toast("Already at max level");takeItem(k);const r=CB17?CB17.grantCreatureXP(code,it.xp):null;toast(`+${it.xp} XP${r&&r.gained?" · Level up! Lv"+save.col[code].lvl:""}`);}
   else if(it.cat==="catalyst"){takeItem(k);s.sp=(s.sp||0)+1;persist();toast("+1 Skill Point");}
   mEvent("useitem");renderItems();});}
 // ---- BATTLE ITEMS ----
@@ -5024,7 +5032,7 @@ function newGameForm(){let em=0,col=0;const m=modal(`<div class="invbook"><h3>A 
  m.querySelectorAll(".emb").forEach(b=>b.onclick=()=>{em=+b.dataset.i;hl()});m.querySelectorAll(".tcol").forEach(b=>b.onclick=()=>{col=+b.dataset.i;hl()});
  m.querySelector("#begin").onclick=()=>{const nm=(m.querySelector("#tnIn").value||"").trim()||"Tracer";const pack=m.querySelector("#starter").checked;const bd=bdRead(m,"bdNew");m.remove();newGame(nm,em,col,pack);if(save.tracer){save.tracer.bday=bd;persist();dnApply();bdayCheck();try{renderTracer()}catch(e){}}tracerPicker(true);};}
 function newGame(nm,em,col,pack){for(const k in _lvSnap)delete _lvSnap[k];setTimeout(netRestart,0);save={col:{},order:[],team:[],team2:[],v:2,tracer:defTracer(nm,em,col),inv:null};migrate();save.tracer.crystals=CRYSTAL_SRC.newTracer;
- if(pack){DEMO.forEach((d,n)=>{const c=normCode(d);if(!save.col[c]){save.col[c]={lvl:1,xp:0,t:Date.now()+n,rk:{a1:1,a2:1},sp:0};save.order.push(c);}});save.team=DEMO.slice(0,4).map(normCode);save.team2=DEMO.slice(4,8).map(normCode);save.tracer.seen=[...new Set(save.order.map(k=>gen(k).base))];}
+ if(pack){DEMO.forEach((d,n)=>{const c=normCode(d);if(!save.col[c]){save.col[c]={lvl:(window.CB17?CB17.START_LVL(gen(c).rar):5),xp:0,t:Date.now()+n,rk:{a1:1,a2:1},sp:0,baby:1,v17:1};save.order.push(c);}});save.team=DEMO.slice(0,4).map(normCode);save.team2=DEMO.slice(4,8).map(normCode);save.tracer.seen=[...new Set(save.order.map(k=>gen(k).base))];}
  persist();$("#lastScan").innerHTML="";toast(`Welcome, Tracer ${esc(nm)}.`);go(pack?"col":"scan");}
 document.querySelectorAll("[data-home]").forEach(b=>b.onclick=()=>showTitle(true));
 // ---- CLASH ANIMATION (canvas) ----
@@ -5332,7 +5340,7 @@ function pvpRewardOk(fid){const d=localDay(NOW());save.pvp=save.pvp&&save.pvp.da
 function netEnd(){const w=B.winner===0,fid=B.net.fid;let msg=w?"Victory!":"Defeat";if(B.ff==="them")msg="Victory! (opponent forfeited)";if(B.ff==="drop")msg="Victory! (opponent disconnected)";if(B.ff==="me")msg="You forfeited";if(B.timeout)msg+=" (on remaining HP)";
  let rew;const team=B.units.filter(u=>u.side===0).map(u=>u.c.code);
  if(pvpRewardOk(fid)){save.pvp.n[fid]=(save.pvp.n[fid]||0)+1;const left=PVP.capPerFriendPerDay-save.pvp.n[fid];const ups=[];
-  if(w)mEvent("win");team.forEach(code=>{const s=save.col[code];if(!s)return;const b4=s.lvl;s.xp+=w?PVP.creatureXpWin:PVP.creatureXpLoss;s.lvl=Math.min(10,1+Math.floor(s.xp/100));if(s.lvl>b4)ups.push(gen(code).base+" → Lv"+s.lvl);});
+  if(w)mEvent("win");team.forEach(code=>{const s=save.col[code];if(!s)return;const n=w?(window.CB17?CB17.battleXP(true,s.lvl):PVP.creatureXpWin):(window.CB17?CB17.battleXP(false,s.lvl):PVP.creatureXpLoss);const r=CB17?CB17.grantCreatureXP(code,n):null;if(r&&r.gained)ups.push(gen(code).base+" → Lv"+s.lvl);});
   if(w)save.wins=(save.wins||0)+1;save.pvpWins=(save.pvpWins||0)+(w?1:0);persist();const sh=w?SHARD_SRC.win:SHARD_SRC.loss,xp=w?XP_SRC.win:XP_SRC.loss;
   setTimeout(()=>{save.tracer.shards+=sh;persist();toast(`💠 +${sh} Relic Shards · PvP ${w?"victory":"battle"}`);addTracerXP(xp,w?"PvP battle won":"PvP battle fought");},300);
   rew=`<div class="sub" style="text-align:center">Team creatures +${w?PVP.creatureXpWin:PVP.creatureXpLoss} XP. Tracer: +${xp} XP, +${sh} 💠${ups.length?"<br><b style='color:var(--gold)'>Level up! "+ups.join(", ")+"</b>":""}<br><span style="font-size:11px;opacity:.7">${left} rewarded battle${left===1?"":"s"} left with ${esc(B.net.opp)} today</span></div>`;}
@@ -6209,5 +6217,140 @@ window.CB16J={force(b){if(!B)return;B.biome=b;B.map=B.map.map(()=>b);const bd=do
  requestAnimationFrame(tick);})();
 
 (function(){let fb=null,t0=0;addEventListener("resize",()=>{fb=null;});setInterval(()=>{try{const on=document.querySelector("#s-battle.on");if(!on){fb=null;return;}const b=CB.getB&&CB.getB();if(b&&b!==fb){if(!t0)t0=Date.now();if(Date.now()-t0>350){fb=b;t0=0;CB161.fit(false);}}}catch(e){}},120);})();
+
+/* v17: Pokemon-style creature stats, XP, damage, migration, level-up UI */
+(function(){
+const wrap=(name,f)=>{const o=window[name];if(typeof o!=="function")return;const w=f(o);window[name]=w;try{eval(name+"=w");}catch(e){}};
+const setG=(n,f)=>{window[n]=f;try{eval(n+"=f");}catch(e){}};
+
+const LVL_CAP=100;
+const BABY_BASE=0.7; // hatchling base-stat multiplier; adult = full on evolve
+const START_LVL=r=>Math.min(10,5+(r|0)); // Common 5 … Legendary 9
+const xpToNext=L=>Math.max(1,Math.pow(Math.min(LVL_CAP,L)+1,3)-Math.pow(Math.min(LVL_CAP,L),3));
+const xpAtLevel=L=>Math.pow(Math.max(1,Math.min(LVL_CAP,L)),3);
+
+function ivs(code){const r=rngFrom(hash("iv:"+normCode(code)));return[0,1,2,3,4,5].map(()=>0|Math.floor(r()*32));}
+function speciesBase(R,rar){const rr=rngFrom(hash("base:"+R[0]));const a=ARCH[R[3]];const rm=RAR[rar].m;
+ return a.map((v,i)=>{let b=v*(0.85+rr()*0.3)*rm;if(i===3)b*=0.9;return Math.max(5,Math.round(b));});}
+function pokeStat(base,iv,lvl,hp){lvl=Math.max(1,Math.min(LVL_CAP,lvl|0));iv=Math.max(0,Math.min(31,iv|0));base=Math.max(1,base|0);
+ return hp?Math.floor((2*base+iv)*lvl/100)+lvl+10:Math.floor((2*base+iv)*lvl/100)+5;}
+
+function applyStats(c,base,IV,lvl,baby){c.baseStats=base.slice();c.ivs=IV.slice();
+ const b=baby?base.map(v=>Math.max(5,Math.round(v*BABY_BASE))):base;
+ const st=b.map((v,i)=>pokeStat(v,IV[i],lvl,i===0));
+ c.hp=st[0];c.pow=st[1];c.def=st[2];c.spd=st[3];c.ess=st[4];c.edef=st[5];
+ c.move=Math.max(2,Math.min(6,2+Math.floor(st[3]/8)));return c;}
+
+// ---- replace gen() with Pokemon scaling (species/rarity/abilities unchanged) ----
+wrap("gen",()=>function gen(code,lvl=1,xp=0,rk,rup,asBaby){
+ code=normCode(code);const seed=hash("codex:"+code);const r=rngFrom(seed);
+ const ri=Math.floor(r()*ROSTER.length);const R=ROSTER[ri];
+ const roll=r();let rar=0,acc=0;for(let i=0;i<5;i++){acc+=RAR_P[i];if(roll<acc){rar=i;break;}}if(rup)rar=Math.min(4,rar+rup);
+ const IV=ivs(code);const base=speciesBase(R,rar);
+ let variant=pick(r,VARIANTS);if(rar===4&&r()<0.5)variant=PRISM;
+ const title=rar===4?pick(r,LEG_TITLES):pick(r,TITLES);
+ const el=R[2],ea=ELEM_AB[el],aa=ARCH_AB[R[3]];
+ const ab=[{k:"a1",n:ea[0],t:"ess",r:ea[1],pw:ea[2],cd:1,d:el+" essence attack.",fxk:FX_EL[el]},{k:"a2",...aa,fxk:FX_ARCH[R[3]]}];
+ ab.forEach(a=>applyRank(a,Math.max(1,Math.min(MAXR,(rk&&rk[a.k])||1))));
+ const vh=variant.h!=null?variant.h:ELEMENTS[el].hue+(rngFrom(hash("base:"+R[0]))()*50-25)+variant.h;
+ const c={code,uid:seed.toString(36),ri,base:R[0],name:title+" "+R[0],title,origin:ORIGIN[R[1]],el,arch:R[3],feat:R[4],rar,rarity:RAR[rar].n,variant:variant.n,prism:!!variant.prism,
+  hue:((vh%360)+360)%360,sat:Math.max(5,Math.min(95,55+variant.s+r()*15)),lig:Math.max(34,Math.min(78,48+variant.l+r()*8)),
+  float:FLOAT.has(R[3]),ab,lvl:Math.max(1,Math.min(LVL_CAP,lvl|0)),xp:xp|0,dom:DOMAIN[R[0]]||null};
+ applyStats(c,base,IV,c.lvl,false);
+ if(asBaby)applyStats(c,base,IV,c.lvl,true);
+ return c;
+});
+
+// ---- Pokemon-like damage ----
+wrap("calcDmg",()=>function calcDmg(st,att,ax,ay,def,a){
+ const phys=a.t==="phys";const A=phys?att.c.pow:att.c.ess;let D=phys?def.c.def:def.c.edef;
+ const db=st.map[def.y*N+def.x],dfe=st.feat?st.feat[def.y*N+def.x]:0;if(phys&&dfe===2)D*=1.2;if(phys&&dfe===1&&db==="Forest")D*=1.1;
+ const em=phys?1:elemMult(att.c.el,def.c.el);const bm=hbm((BIOME_BONUS[st.map[ay*N+ax]]||{})[att.c.el]);
+ const cm=cvMods(st,att,def);
+ const L=Math.max(1,att.c.lvl|0);const Power=Math.max(20,Math.round((a.pw||1)*40));
+ D=Math.max(1,D);let dmg=Math.floor(Math.floor((Math.floor(2*L/5+2)*Power*A)/D)/50)+2;
+ dmg=Math.max(1,Math.round(dmg*em*bm*cm.res*cm.bst));
+ return{dmg,em,bm,res:cm.res,bst:cm.bst};
+});
+
+// ---- XP helpers ----
+function showLvlUp(c,before,after){
+ const keys=[["HP","hp"],["Atk","pow"],["Def","def"],["Spd","spd"],["Ess","ess"],["EDef","edef"]];
+ const bits=keys.map(([n,k])=>{const d=after[k]-before[k];return d>0?`+${d} ${n}`:null;}).filter(Boolean);
+ const msg=`Lv up! ${c.base} → Lv${after.lvl}`+(bits.length?" · "+bits.slice(0,3).join(" · "):"");
+ try{toast(msg);}catch(e){}
+ let el=document.getElementById("g17lvl");
+ if(!el){el=document.createElement("div");el.id="g17lvl";document.body.appendChild(el);}
+ el.className="on";el.innerHTML=`<b>Lv up!</b> ${esc(c.name||c.base)} → <em>Lv ${after.lvl}</em><div class="g">${bits.map(b=>`<span>${b}</span>`).join("")}</div>`;
+ clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove("on"),2600);
+}
+
+function grantCreatureXP(code,n){const s=save.col[code];if(!s||!(n>0))return null;
+ migrateOne(s,code);
+ const before=owned(code);let gained=0;s.xp=(s.xp|0)+n|0;
+ while(s.lvl<LVL_CAP&&s.xp>=xpToNext(s.lvl)){s.xp-=xpToNext(s.lvl);s.lvl++;gained++;}
+ if(s.lvl>=LVL_CAP){s.lvl=LVL_CAP;s.xp=0;}
+ persist();const after=owned(code);
+ if(gained)showLvlUp(before,before,after);
+ return{gained,before,after};
+}
+
+function battleXP(win,avgEnemyLvl){const L=Math.max(1,avgEnemyLvl|0);return win?Math.max(20,Math.floor(L*32/5)):Math.max(8,Math.floor(L*12/5));}
+
+function migrateOne(s,code){if(s.v17)return false;
+ const oldL=Math.max(1,s.lvl|0),oldX=s.xp|0;
+ // old: lvl≈1+floor(xp/100) capped 10 — map into Pokemon band
+ let nl=Math.min(LVL_CAP,Math.max(START_LVL(0),Math.round(5+(oldL-1)*5)));
+ // if they had leftover xp toward next old level, nudge
+ const frac=(oldX%100)/100;nl=Math.min(LVL_CAP,nl+Math.floor(frac*2));
+ s.lvl=nl;s.xp=0;s.v17=1;return true;
+}
+function migrateAll(){let n=0;Object.keys(save.col||{}).forEach(k=>{if(migrateOne(save.col[k],k))n++;});if(n){persist();try{toast(`Stats updated: ${n} creature${n>1?"s":""} migrated to v17 leveling`);}catch(e){}}return n;}
+
+// wrap migrate to also run creature migration
+wrap("migrate",o=>function(){const r=o.apply(this,arguments);try{migrateAll();}catch(e){}return r;});
+
+// new summons start at START_LVL(rar)
+wrap("addCode",o=>function(raw,src){
+ const before=Object.keys(save.col).length;
+ const r=o.apply(this,arguments);
+ try{const code=normCode(raw);const s=save.col[code];
+  if(s&&s.baby&&(s.lvl|0)<=1&&!(s.v17)){ // freshly added
+   const c0=gen(code);const lv=START_LVL(c0.rar);s.lvl=lv;s.xp=0;s.v17=1;persist();
+  }
+ }catch(e){}
+ return r;
+});
+
+// end-of-battle XP: patch via wrapping nothing — replace reward paths by hooking startBattle completion is hard;
+// instead override the XP math sites by wrapping a sentinel used in endBattle. Patch app.html to call CB17.
+
+// AI team: match player average level (±1)
+wrap("scaledAITeam",()=>function scaledAITeam(myTeam,r){
+ const lv=Math.max(1,Math.round(myTeam.reduce((a,c)=>a+(c.lvl||5),0)/Math.max(1,myTeam.length)));
+ const out=[];for(let i=0;i<600&&out.length<myTeam.length;i++){
+  const code=String(Math.floor(r()*1e12)).padStart(12,"0");
+  const elv=Math.max(1,Math.min(LVL_CAP,lv+((i%3)-1)));
+  const c=gen(code,elv);out.push(c);
+ }return out.slice(0,myTeam.length);
+});
+
+// tonics / battle XP helpers exposed
+const CB17={LVL_CAP,xpToNext,xpAtLevel,ivs,speciesBase,pokeStat,grantCreatureXP,battleXP,migrateAll,migrateOne,START_LVL,BABY_BASE,showLvlUp,
+ oldAt1(code){/* approx pre-v17 lvl1 for docs */const seed=hash("codex:"+normCode(code));const r=rngFrom(seed);const ri=Math.floor(r()*ROSTER.length);const R=ROSTER[ri];
+  const roll=r();let rar=0,acc=0;for(let i=0;i<5;i++){acc+=RAR_P[i];if(roll<acc){rar=i;break;}}
+  const rr=rngFrom(hash("base:"+R[0]));const a=ARCH[R[3]];const base=a.map(v=>v*(0.85+rr()*0.3));const rm=RAR[rar].m;
+  const st=base.map((v,i)=>Math.round(v*(0.88+r()*0.24)*(i===3?1+(rm-1)*0.5:rm)));
+  return{base:R[0],rar,hp:st[0],pow:st[1],def:st[2],spd:st[3],ess:st[4],edef:st[5]};}};
+window.CB17=CB17;setG("CB17",CB17);
+
+// refresh CB.gen / calcDmg exports
+try{if(window.CB){CB.gen=gen;CB.calcDmg=calcDmg;CB.scaledAITeam=scaledAITeam;}}catch(e){}
+try{if(window.CB12){CB12.gen=gen;CB12.calcDmg=calcDmg;}}catch(e){}
+try{if(window.CB13){CB13.migrate=migrate;CB13.addCode=addCode;}}catch(e){}
+
+// run migration if save already loaded
+try{if(typeof save!=="undefined"&&save&&save.col)migrateAll();}catch(e){}
+})();
 
 </script></body></html>
