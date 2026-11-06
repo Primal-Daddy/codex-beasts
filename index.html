@@ -1270,8 +1270,8 @@ body.g16e #s-battle #dio::after{content:"";position:absolute;inset:0;pointer-eve
 #board[data-biome="Tundra"] .cell.g16f.kf::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 40% 40%,#fff 0 1.5px,#0000 2px),radial-gradient(circle at 70% 60%,#fff 0 1px,#0000 2px);opacity:.7}
 #board[data-biome="Volcanic"] .cell.g16f.kf::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(45deg,#0000 0 8px,#ff6a2033 8px 9px);opacity:.55}
 #board[data-biome="Ruins"] .cell.g16f.kf::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 50%,#e8a0ff33,#0000 60%)}
-/* v16l: edge scenery billboarded upright (counter-rotate like figures) */
-#g16edge{position:absolute;inset:-22% -16%;pointer-events:none;z-index:2;transform-style:preserve-3d}
+/* v16m: edge scenery removed (was overshadowing board); keep rules inert */
+#g16edge{display:none!important;position:absolute;inset:-22% -16%;pointer-events:none;z-index:2;transform-style:preserve-3d}
 #g16edge .g16esc{position:absolute;width:calc(var(--sc,1)*16%);transform-origin:50% 100%;transform:var(--bri) scale(var(--sc,1));
  filter:drop-shadow(0 0 1px #000) drop-shadow(0 3px 2px #000a);opacity:.9;transform-style:preserve-3d}
 #g16edge .g16esc img{width:100%;height:auto;display:block;filter:saturate(1.2) contrast(1.05);transform-origin:50% 100%}
@@ -6077,7 +6077,7 @@ function arena(){const bd=document.getElementById("board");if(!bd||bd.dataset.g1
  try{biomeDress(bd,P);}catch(e){}
  fitAll();}
 /* v16j: anime biome ambience, edge scenery, prop revive */
-const EDGE={/* v16l: upright-only billboards (no rocks/ice — they lay flat) */Plains:["bush","oak","bush"],Forest:["pine","oak","pine","pine"],Water:["reeds","reeds","bush"],Desert:["crag","crag","reeds"],Swamp:["reeds","bush","oak"],Mountain:["crag","crag","pine"],Tundra:["pine","pine","crag"],Volcanic:["crag","crag","pillar"],Ruins:["pillar","pillar","crag"]};
+const EDGE={/* v16m: unused — edge scenery removed */Plains:["bush","oak","bush"],Forest:["pine","oak","pine","pine"],Water:["reeds","reeds","bush"],Desert:["crag","crag","reeds"],Swamp:["reeds","bush","oak"],Mountain:["crag","crag","pine"],Tundra:["pine","pine","crag"],Volcanic:["crag","crag","pillar"],Ruins:["pillar","pillar","crag"]};
 const DIOBG={/* faint biome tint over galaxy */Plains:["#3a6a4a","#1a2a38","#0a0818"],Forest:["#1a4a38","#0a2030","#060818"],Water:["#1a3a6a","#0a1840","#060818"],Desert:["#5a3a2a","#1a1830","#0a0818"],Swamp:["#2a3a28","#121828","#060810"],Mountain:["#3a3a4a","#181828","#080810"],Tundra:["#3a4a6a","#182038","#080818"],Volcanic:["#4a1a28","#1a0820","#0a0410"],Ruins:["#3a2a5a","#180828","#0a0618"]};
 function galaxy(dio){if(!dio)return;let cv=document.getElementById("g16gal");
  if(!cv){cv=document.createElement("canvas");cv.id="g16gal";dio.insertBefore(cv,dio.firstChild||null);}
@@ -6098,12 +6098,8 @@ function biomeDress(bd,P){const bm=B.biome||"Plains",dio=document.getElementById
  if(dio){dio.dataset.biome=bm;document.body.dataset.biome=bm;const bg=DIOBG[bm]||DIOBG.Plains;
   dio.style.setProperty("--bio0",bg[0]);dio.style.setProperty("--bio1",bg[1]);dio.style.setProperty("--bio2",bg[2]);
   dio.style.setProperty("--bia",P[2]);dio.style.setProperty("--bis",P[0]);try{galaxy(dio);}catch(e){}}
- let E=document.getElementById("g16edge");if(E)E.remove();E=document.createElement("div");E.id="g16edge";E.dataset.biome=bm;bd.appendChild(E);
- const props=EDGE[bm]||EDGE.Plains,seed=(B.feat.reduce((a,v,i)=>a+v*(i+3),7))&1023;
- const place=(side,n)=>{for(let i=0;i<n;i++){const k=props[(seed+i*3+side.length)%props.length];const d=document.createElement("div");d.className="g16esc "+k;const t=TEX&&TEX["props/"+k];
-  const u=((seed+i*17+side.charCodeAt(0))%90)/100,sc=.7+.45*((seed+i*9)%10)/10;
-  d.style.cssText=`--u:${u};--sc:${sc};`;if(t)d.innerHTML=`<img src="${t}" alt="">`;else d.textContent=({pine:"🌲",oak:"🌳",bush:"🌿",reeds:"🌿",pillar:"🗿",crag:"⛰"})[k]||"•";E.appendChild(d);d.dataset.side=side;}};
- place("n",3);place("s",2);place("w",2);place("e",2);
+ // v16m: no outside-board edge scenery (#g16edge) — it overshadowed the field
+ const E=document.getElementById("g16edge");if(E)E.remove();
  // revive billboard props; hide ground-only sprites that can't stand (rocks/ice)
  bd.querySelectorAll(".prop").forEach(p=>{const flat=/rocks|ice/.test(p.className);if(flat){p.style.display="none";p.classList.remove("g16on");return;}
   p.classList.add("g16on");p.style.display="";});
@@ -6159,7 +6155,7 @@ window.CB16J={force(b){if(!B)return;B.biome=b;B.map=B.map.map(()=>b);const bd=do
     if(!hb){hb=document.createElement("b");hb.className="g16hb";hb.innerHTML="<i></i>";L.appendChild(hb);M.set(t.id+"h",hb);}hb.classList.toggle("e",h.classList.contains("e"));
     hb.style.cssText=`left:${(q.left-d.left).toFixed(1)}px;top:${(q.top-d.top).toFixed(1)}px;width:${q.width.toFixed(1)}px`;const ci=hb.firstChild;ci.style.width=hi?hi.style.width:"100%";ci.style.background=hi?getComputedStyle(hi).backgroundColor:"";seen.add(t.id+"h");}});
   /* v16j: stamp tall obstacles into the figure layer so units draw behind them */
-  bd.querySelectorAll(".cell.g16f.kw .g16obs, .prop.g16on img, #g16edge .g16esc img").forEach((el,i)=>{
+  bd.querySelectorAll(".cell.g16f.kw .g16obs, .prop.g16on img").forEach((el,i)=>{
    const img=el.tagName==="IMG"?el:el.querySelector("img");const r=(img||el).getBoundingClientRect();if(!r.width||!r.height)return;
    const id="obs"+i+"_"+((el.closest(".cell")||el.closest(".prop")||el).dataset.i||el.dataset.x||i);
    let c=M.get(id);if(img&&img.complete&&img.naturalWidth){if(!c||c.tagName!=="IMG"){if(c)c.remove();c=document.createElement("img");c.decoding="async";L.appendChild(c);M.set(id,c);}if(c._src!==img.currentSrc){c.src=img.currentSrc;c._src=img.currentSrc;}
