@@ -6164,7 +6164,7 @@ window.CB16J={force(b){if(!B)return;B.biome=b;B.map=B.map.map(()=>b);const bd=do
   if(anim){const fin=bd.style.transform;bd.style.transform=prev;void bd.offsetWidth;bd.style.transition="transform .45s cubic-bezier(.3,.8,.3,1)";bd.style.transform=fin;}
   CAM.snap={x:ZM.x,y:ZM.y,z:ZM.z};const rb=document.getElementById("zReset");if(rb){rb.textContent="⟲";rb.style.display=(Math.abs(ZM.z-CAM.fitZ)>.03||CAM.user)?"block":"none";}});
  wrap("focusUnit",o=>function(u){if(u)aim(u,null,900);});
- const fitO=CB161.fit;CB161.fit=function(a){ZM.fit=1;CAM.goal=null;const r=fitO.apply(this,arguments);CAM.fitZ=ZM.z;ZM.fit=0;CAM.user=0;CAM.snap={x:ZM.x,y:ZM.y,z:ZM.z};return r;};
+ const fitO=CB161.fit;CB161.fit=function(a){ZM.fit=1;CAM.goal=null;const r=fitO.apply(this,arguments);CAM.fitZ=ZM.z;ZM.fit=0;CAM.user=0;CAM.snap={x:ZM.x,y:ZM.y,z:ZM.z};try{if(typeof B!=='undefined'&&B&&!B.over)CAM.last=cur(B);}catch(e){}return r;};
  function aim(u,t,ms,z){CAM.goal={u,t,z:z||null};CAM.until=performance.now()+ms;CAM.user=0;}
  window.CBCAM.aim=aim;
  wrap("attackSeq",o=>function(u,a,t){try{if(t&&t!==u)aim(u,t,1800);}catch(e){}return o.apply(this,arguments);});
