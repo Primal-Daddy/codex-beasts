@@ -1282,6 +1282,43 @@ body.g16e #s-battle #dio::after{content:"";position:absolute;inset:0;pointer-eve
 #g16figs .g16obx{position:absolute;left:0;top:0;transform-origin:0 0;border-radius:4px;background:linear-gradient(#0000,#0006);pointer-events:none}
 #g16figs img{filter:drop-shadow(0 0 .6px #000c)}
 
+/* Effects stay beside the face, at the flanks and feet; eight particles per sprite. */
+.fw{position:relative}.elfx{position:absolute;inset:0;pointer-events:none!important;z-index:3;color:var(--ec);opacity:.78;isolation:isolate;--boost:1}
+.elfx i{position:absolute;left:var(--x);top:var(--y);width:3%;height:3%;background:currentColor;border-radius:50%;box-shadow:0 0 3px currentColor;font-size:clamp(7px,1.5vw,14px);font-style:normal;animation:elRise 2.4s linear infinite;animation-delay:var(--delay)}
+.elfx .elrim{position:absolute;inset:15% 12% 5%;border-radius:48%;border:1px solid currentColor;opacity:.22;animation:elPulse 2s ease-in-out infinite;mask-image:linear-gradient(transparent 15%,#000 65%)}
+.elfx:not(.el-visible) *,body.el-paused .elfx *{animation-play-state:paused!important}
+.el-Arcane i{background:none;box-shadow:none;width:auto;height:auto;animation:elRune 3s ease-in-out infinite}.el-Arcane .elrim{inset:57% 12% 8%;transform:rotate(-12deg);border-width:2px}
+.el-Light i{clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);width:8%;height:8%;animation:elPulse 1.3s infinite}
+.el-Shadow i,.el-Ice i{width:22%;height:8%;background:radial-gradient(ellipse,currentColor,transparent 72%);box-shadow:none;animation:elMist 3s ease-out infinite;opacity:.4}
+.el-Ice i:nth-of-type(3n){width:3%;height:3%;background:#e9ffff;animation:elRise 2s infinite}.el-Shadow{opacity:.5}
+.el-Fire i{width:7%;height:13%;border-radius:75% 20% 70% 30%;background:linear-gradient(#fff5b2,#ff883b,transparent);animation:elFlame 1s ease-out infinite;transform-origin:bottom}
+.el-Fire i:nth-of-type(2n){width:2%;height:3%;animation:elRise 1.7s infinite}
+.el-Water i{width:4%;height:7%;border-radius:70% 40% 65% 55%;animation:elDrop 2s ease-in infinite}.el-Water .elrim,.el-Air .elrim{inset:70% 7% 3%;animation:elRipple 2s infinite}
+.el-Earth i{border-radius:20%;box-shadow:none;width:4%;height:4%;animation:elDust 2.8s ease-in-out infinite}.el-Earth .elrim{display:none}
+.el-Nature i{width:6%;height:3%;border-radius:90% 0 90% 0;animation:elRune 3s ease-in-out infinite}.el-Air i{width:15%;height:2%;background:linear-gradient(90deg,transparent,currentColor,transparent);animation:elRune 1.7s infinite}
+.el-Lightning i{width:9%;height:26%;border-radius:0;clip-path:polygon(60% 0,20% 44%,55% 43%,15% 100%,92% 33%,58% 35%,100% 0);animation:elArc .24s steps(2,end) infinite;background:linear-gradient(90deg,#7bd4ff,#fff,#96dfff);box-shadow:none}
+.el-Lightning .elrim{animation:elPulse .3s steps(2) infinite}
+.tok.lunge .elfx,.tok.cast .elfx,.tok.charge .elfx,.elfx.el-charge,#rv[data-phase="charge"] .elfx{opacity:1;filter:brightness(1.6) drop-shadow(0 0 3px var(--ec))}
+.elfx.el-charge i{animation-duration:.55s!important}
+@keyframes elRise{0%{opacity:0;transform:translateY(15%)}25%{opacity:.8}100%{opacity:0;transform:translate(5px,-24px) scale(.3)}}
+@keyframes elPulse{0%,100%{opacity:.15;scale:.94}50%{opacity:.7;scale:1.06}}
+@keyframes elRune{0%,100%{opacity:0;transform:translate(-4px,8px) rotate(-20deg)}50%{opacity:.85;transform:translate(4px,-8px) rotate(20deg)}}
+@keyframes elMist{0%{opacity:0;transform:translate(0,0) scale(.6)}35%{opacity:.5}100%{opacity:0;transform:translate(9px,20px) scale(1.5)}}
+@keyframes elFlame{0%{opacity:0;transform:scale(.6)}35%{opacity:.9}100%{opacity:0;transform:translateY(-16px) scale(.2,1.3)}}
+@keyframes elDrop{0%{opacity:0;transform:translateY(-6px)}35%{opacity:.8}100%{opacity:0;transform:translateY(14px) scale(.3)}}
+@keyframes elRipple{0%{opacity:0;scale:.6}35%{opacity:.5}100%{opacity:0;scale:1.15}}
+@keyframes elDust{0%,100%{opacity:0;transform:translateY(6px)}45%{opacity:.7;transform:translate(3px,-5px) rotate(80deg)}}
+@keyframes elArc{0%{opacity:0;transform:translateY(-9px) rotate(-15deg)}50%{opacity:1;transform:translate(2px,4px) rotate(15deg)}100%{opacity:.2;transform:translateY(10px)}}
+body.lowfx .elfx i:nth-of-type(n+4){display:none}body.lowfx .elfx *{animation-duration:4s}
+@media(prefers-reduced-motion:reduce){.elfx i{display:none}.elfx .elrim{animation:none!important;opacity:.18}.elfx.el-charge{filter:none}}
+
+body.g16figs #board .elfx{visibility:hidden}
+/* Battle budgets: four flank particles; software/auto-lite uses only the static rim. */
+#g16figs .elfx i:nth-of-type(n+5){display:none}
+#g16figs .elfx i{box-shadow:none}
+body.fxlite .elfx i,body.lowfx #g16figs .elfx i{display:none}
+body.fxlite .elfx *,body.lowfx #g16figs .elfx *{animation:none!important}
+
 #g17lvl{position:fixed;left:50%;top:18%;transform:translate(-50%,-20px);z-index:12000;pointer-events:none;opacity:0;
  background:linear-gradient(180deg,#2a1848ee,#12081cee);border:2px solid #e8c36a;border-radius:12px;padding:10px 16px;color:#f6e6b8;
  font:700 14px Georgia,serif;text-align:center;box-shadow:0 8px 28px #000a;transition:opacity .25s,transform .25s;max-width:86vw}
@@ -4254,7 +4291,7 @@ function figSrc(c){const k=slug(c.base);return FIGS[k]||null;}
 function fig(c,o={}){const bsrc=c.baby?babySrc(c):null,src=bsrc||figSrc(c),E=ELEMENTS[c.el],rc=RAR[c.rar].c;
  const inner=src?`<img src="${src}" alt="${c.base}" decoding="async">${(c.variant==="Gilded"||c.prism)?`<div class="sheen" style="--m:url('${src}')"></div>`:""}${c.cv?`<div class="vtint" style="--m:url('${src}')"></div>`:""}`:art(c,false);
  const cvc=c.cv?CV[c.cv]:null;
- return `<div class="fig r${c.rar} v-${c.prism?"Prismatic":c.variant}${src?"":" svgfb"}${c.cv?" cv cv-"+c.cv:""}${c.baby?(bsrc?" baby":" hatch"):""}" style="--rc:${rc}${cvc?`;--vc:${cvc.c};--vc2:${cvc.c2||cvc.c}`:""}">${o.burst?'<div class="burst"></div>':""}${c.cv?'<div class="vaura"><i></i><i></i><i></i><i></i><i></i></div>':""}${c.rar>=2?'<div class="aura"></div>':""}<div class="base"><div class="dial">${E.ic}<span>${c.lvl}</span></div></div><div class="stage"><div class="fw">${inner}</div></div></div>`;}
+ return `<div class="fig r${c.rar} v-${c.prism?"Prismatic":c.variant}${src?"":" svgfb"}${c.cv?" cv cv-"+c.cv:""}${c.baby?(bsrc?" baby":" hatch"):""}" style="--rc:${rc}${cvc?`;--vc:${cvc.c};--vc2:${cvc.c2||cvc.c}`:""}">${o.burst?'<div class="burst"></div>':""}${c.cv?'<div class="vaura"><i></i><i></i><i></i><i></i><i></i></div>':""}${c.rar>=2?'<div class="aura"></div>':""}<div class="base"><div class="dial">${E.ic}<span>${c.lvl}</span></div></div><div class="stage"><div class="fw">${inner}${window.CBE171?CBE171.html(c):""}</div></div></div>`;}
 // ---------- v3 LORE ----------
 const LORE={open:{Mythology:["Recorded in temple friezes and the oldest epics,","Sung of by ancient poets around temple fires,","Carved on boundary stones by forgotten kingdoms,"],Fantasy:["Charted by wandering guild hunters,","Noted in the margins of a court wizard's bestiary,","Sketched by cartographers at the edge of the wild maps,"],Cryptid:["Reported by truckers, campers and night-shift workers,","Pieced together from blurry photographs and shaky accounts,","Whispered about in roadside diners and campfire tales,"]},
  el:{Fire:"leaves scorched ground and drifting embers in its wake",Water:"is never far from rain, river mist or a rising tide",Earth:"moves with the slow weight of the mountains",Air:"rides the high winds and arrives with a sudden gust",Light:"gives off a faint glow even at midnight",Shadow:"thickens the dark around it until lanterns gutter",Arcane:"warps compasses and spoils careless spells",Nature:"makes moss and creeping vines follow its trail"},
@@ -4742,7 +4779,7 @@ function spellFx(u,t,el){bfCanvas();const E=efx(el),a=ctr(u),b=ctr(t),cw=BF.w/N,
  return E.k==="beam"||E.k==="tend"?dur*.7:dur;}
 function shake(n){if(fxMin())return;const bw=$("#board")&&$("#board").parentElement;if(!bw)return;bw.classList.remove("shk","shk2");void bw.offsetWidth;bw.classList.add(n>1?"shk2":"shk");setTimeout(()=>bw.classList.remove("shk","shk2"),TS(400));}
 // rank-5 cut-in: a slim ~0.8s strip that slides in and out at the top (or bottom) and never covers the attacker or the target
-function cutIn(u,a,t){if(fxMin()||DUEL.quiet)return 0;const d=document.createElement("div");d.className="cutin";d.style.setProperty("--ec",ELEMENTS[u.c.el].c);d.style.setProperty("--cd",TS(800)+"ms");
+function cutIn(u,a,t){if(window.CBE171)CBE171.charge(u,1600);if(fxMin()||DUEL.quiet)return 0;const d=document.createElement("div");d.className="cutin";d.style.setProperty("--ec",ELEMENTS[u.c.el].c);d.style.setProperty("--cd",TS(800)+"ms");
  const H=58,m=8,rs=[u,t].filter(Boolean).map(x=>{const e=$("#u"+x.id);return e&&e.getBoundingClientRect();}).filter(Boolean);
  const hit=y=>rs.reduce((s,r)=>s+Math.max(0,Math.min(y+H,r.bottom)-Math.max(y,r.top)),0);const dio=$("#dio")&&$("#dio").getBoundingClientRect();
  const cand=[m,dio?dio.top-H-4:-1,dio?dio.bottom+4:-1,innerHeight-H-m].filter(v=>v>=0&&v+H<=innerHeight);let y=cand.find(v=>hit(v)===0);if(y==null)y=cand.sort((p,q)=>hit(p)-hit(q))[0];
@@ -4757,7 +4794,7 @@ function scrOrb(a,b,c,ms){if(fxMin()||!a||!b)return;const A=scrC(a),Bp=scrC(b),o
  o.style.transition=`left ${ms}ms cubic-bezier(.5,0,.9,.6),top ${ms}ms cubic-bezier(.3,0,.6,1),transform ${ms}ms`;o.style.left=Bp.x+"px";o.style.top=Bp.y+"px";o.style.transform="translate(-50%,-50%) scale(1.25)";setTimeout(()=>o.remove(),ms+30);}
 function scrHit(b,c,big){if(fxMin()||!b)return;const P=scrC(b),h=document.createElement("i");h.className="shit"+(big?" big":"");h.style.cssText=`left:${P.x}px;top:${P.y}px;--c:${c}`;document.body.appendChild(h);setTimeout(()=>h.remove(),TS(600));}
 // main entry: replaces the v13 animAttack. returns extra ms the caller should wait
-function animAttack(u,a,t,res){bfCanvas();const at=$("#u"+u.id),tt=$("#u"+t.id),el=u.c.el,E=efx(el);
+function animAttack(u,a,t,res){if(window.CBE171)CBE171.charge(u,1100);bfCanvas();const at=$("#u"+u.id),tt=$("#u"+t.id),el=u.c.el,E=efx(el);
  const ranged=a.t==="ess"||Math.abs(u.x-t.x)+Math.abs(u.y-t.y)>1;const big=res.em>1||!!res.perfect;
  const ci=(a.rank||1)>=ANIM.cutRank&&a.k!=="st"?cutIn(u,a,t):0;
  setTimeout(()=>{let hitAt;
@@ -6156,6 +6193,7 @@ window.CB16J={force(b){if(!B)return;B.biome=b;B.map=B.map.map(()=>b);const bd=do
   const d=dio.getBoundingClientRect(),seen=new Set(),list=[];
   bd.querySelectorAll(".tok").forEach(t=>{const s=t.querySelector(".fig .fw img");if(!s||!s.complete||!s.naturalWidth)return;const r=s.getBoundingClientRect();if(!r.width)return;
    let c=M.get(t.id);if(!c){c=document.createElement("img");c.decoding="async";L.appendChild(c);M.set(t.id,c);}if(c._src!==s.currentSrc){c.src=s.currentSrc;c._src=s.currentSrc;}
+   let ef=M.get(t.id+"fx");const orig=t.querySelector(".elfx");if(orig){if(!ef){ef=orig.cloneNode(true);L.appendChild(ef);M.set(t.id+"fx",ef);}seen.add(t.id+"fx");ef.style.width=r.width+"px";ef.style.height=r.height+"px";ef.style.inset="auto";ef.style.transform=`translate(${(r.left-d.left).toFixed(2)}px,${(r.top-d.top).toFixed(2)}px)`;ef.style.opacity=op(s).toFixed(3);ef.classList.toggle("el-charge",t.matches(".lunge,.cast,.charge")||performance.now()<+(t.dataset.elUntil||0));list.push([r.bottom+.01,ef]);}
    seen.add(t.id);const f=getComputedStyle(s).filter,sf=getComputedStyle(s.closest(".stage")||s).filter;
    c.style.width=r.width+"px";c.style.height=r.height+"px";c.style.transform=`translate(${(r.left-d.left).toFixed(2)}px,${(r.top-d.top).toFixed(2)}px)`;
    c.style.opacity=op(s).toFixed(3);c.style.filter=[sf,f].filter(x=>x&&x!=="none"&&!/drop-shadow/.test(x)).join(" ")||"none";list.push([r.bottom,c]);
@@ -6217,6 +6255,19 @@ window.CB16J={force(b){if(!B)return;B.biome=b;B.map=B.map.map(()=>b);const bd=do
  requestAnimationFrame(tick);})();
 
 (function(){let fb=null,t0=0;addEventListener("resize",()=>{fb=null;});setInterval(()=>{try{const on=document.querySelector("#s-battle.on");if(!on){fb=null;return;}const b=CB.getB&&CB.getB();if(b&&b!==fb){if(!t0)t0=Date.now();if(Date.now()-t0>350){fb=b;t0=0;CB161.fit(false);}}}catch(e){}},120);})();
+
+/* v17.1: bounded, screen-space elemental companions. No timers per particle. */
+(function(){
+ const colors={Lightning:'#b9edff',Ice:'#bcefff',Fire:'#ff9852',Water:'#67cfff',Earth:'#d9b47d',Air:'#a7f6eb',Nature:'#a0f983',Shadow:'#ad8de9',Light:'#fff2a9',Arcane:'#eda6ff'};
+ function kind(c){if(/frost|ice|yeti|wendigo/i.test(c.base||''))return 'Ice';if(/thunder|lightning|raiju/i.test(c.base||''))return 'Lightning';return colors[c.el]?c.el:'Arcane';}
+ function html(c){const k=kind(c);return `<span class="elfx el-${k}" data-element="${k}" aria-hidden="true" style="--ec:${colors[k]}"><b class="elrim"></b>${Array.from({length:8},(_,i)=>`<i style="--i:${i};--x:${i%2?79-i*2:12+i*2}%;--y:${35+(i*13)%54}%;--delay:${-i*.31}s">${k==='Arcane'?['ᛜ','ᚱ','ᛉ','✧'][i%4]:''}</i>`).join('')}</span>`;}
+ const io=new IntersectionObserver(es=>es.forEach(e=>e.target.classList.toggle('el-visible',e.isIntersecting)),{rootMargin:'25px'});
+ const observe=root=>{if(root.matches?.('.elfx'))io.observe(root);root.querySelectorAll?.('.elfx').forEach(e=>io.observe(e));};
+ new MutationObserver(ms=>ms.forEach(m=>{m.addedNodes.forEach(observe);m.removedNodes.forEach(n=>{if(n.matches?.('.elfx'))io.unobserve(n);n.querySelectorAll?.('.elfx').forEach(e=>io.unobserve(e));});})).observe(document.body,{childList:true,subtree:true});
+ observe(document);document.addEventListener('visibilitychange',()=>document.body.classList.toggle('el-paused',document.hidden));
+ function charge(u,ms){const t=document.getElementById("u"+u.id);if(!t)return;t.dataset.elUntil=performance.now()+ms;t.querySelectorAll(".elfx").forEach(e=>{e.classList.add("el-charge");setTimeout(()=>e.classList.remove("el-charge"),ms);});}
+ window.CBE171={html,kind,colors,charge};
+})();
 
 /* v17: Pokemon-style creature stats, XP, damage, migration, level-up UI */
 (function(){
