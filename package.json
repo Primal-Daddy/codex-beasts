@@ -1,0 +1,11 @@
+{
+  "name": "codex-beasts",
+  "private": true,
+  "scripts": {
+    "check": "node --check src/tutorial-core.js && node --check src/tutorial.js && node --check tests/tutorial-core.test.js && node --check tests/tutorial-integration.mjs",
+    "test": "node --test tests/tutorial-core.test.js && node tests/tutorial-integration.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "1.49.1"
+  }
+}
