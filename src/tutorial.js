@@ -7,6 +7,26 @@
   var Core = window.CBTutorialCore;
   if (!Core) { console.warn("tutorial: core missing"); return; }
 
+  /* Magic energy is a battle pool specials spend. It is not the Essence
+     damage stat and not the cooldown. One special costs ME.cost. The start
+     of that creature's turn restores ME.regen, so a single special each
+     turn stays affordable. A second special in the same turn, or a pool
+     below the cost, is refused. */
+  var ME = { max: 8, cost: 4, regen: 4 };
+  function magicCost(a) { return a && a.t === "ess" && a.k !== "st" ? ME.cost : 0; }
+  function ensureMe(u) {
+    if (!u) return;
+    if (!u.meMax) u.meMax = ME.max;
+    if (u.me == null) u.me = u.meMax;
+  }
+  function recoverMagic(u) {
+    if (!u || !u.alive) return 0;
+    ensureMe(u);
+    var before = u.me | 0;
+    u.me = Math.min(u.meMax, before + ME.regen);
+    return u.me - before;
+  }
+
   var SAVE_KEY = "codexbeasts.v1";
   var boardN = 8;
 
@@ -135,9 +155,13 @@
         screen = "campaign";
       }
       var r = orig.call(this, screen);
-      if (screen === "campaign") renderCampaign();
+      if (screen === "campaign") {
+        var camp = document.getElementById("s-campaign");
+        if (camp) camp.classList.remove("pflip");
+        renderCampaign();
+      }
       if (screen === "scan") paintLock();
-      if (screen !== "battle") clearCoach();
+      if (screen !== "battle") { clearCoach(); var bar = document.getElementById("meBar"); if (bar) bar.remove(); }
       return r;
     };
   });
@@ -186,10 +210,36 @@
       var r = orig.apply(this, arguments);
       var s = save();
       if (s) {
-        s.tutorial = pack ? Core.waived("starter-pack", false) : Core.fresh();
+        if (pack) {
+          s.col = {};
+          s.order = [];
+          s.team = [];
+          s.team2 = [];
+          if (s.tracer) s.tracer.seen = [];
+          toast("The starter pack opens after the five-stage trial. One barcode comes first.");
+        }
+        s.tutorial = Core.fresh();
         writeSave();
       }
       paintLock();
+      if (pack && typeof show === "function") show("scan");
+      return r;
+    };
+  });
+  hook("newGameForm", function (orig) {
+    return function () {
+      var r = orig.apply(this, arguments);
+      var box = document.querySelector("#starter");
+      if (box) {
+        box.checked = false;
+        box.disabled = true;
+        if (box.parentNode && !box.parentNode.querySelector(".tut-packnote")) {
+          var note = document.createElement("small");
+          note.className = "tut-packnote";
+          note.textContent = " Opens after the five-stage trial.";
+          box.parentNode.appendChild(note);
+        }
+      }
       return r;
     };
   });
@@ -382,8 +432,15 @@
     B._startingTutorial = false;
     buildBoard();
     B.stash = [];
+    B.units.forEach(ensureMe);
+    if (stage === 3) {
+      var learner = B.units.filter(function (u) { return u.side === 0; })[0];
+      var art = learner && (learner.c.ab || []).filter(function (a) { return a.t === "ess" && !a.locked; })[0];
+      if (learner) { learner.meMax = magicCost(art) || ME.cost; learner.me = learner.meMax; }
+    }
     beginTurn();
     paintCoach();
+    paintMagic();
     return true;
   }
 
@@ -439,7 +496,7 @@
     if (typeof show === "function") show("campaign");
     var m = document.createElement("div");
     m.className = "modal";
-    m.innerHTML = "<div class='box' id='tutVictory'><h2>The chart is yours</h2><p>The trial is complete. Today's remaining scans are open: <b>" + scans + "</b>. Nothing extra was added.</p><p>Field potions, once: <b>" + n + " Healing Herbs</b>.</p><button class='pri' id='tutDone' style='width:100%'>Walk the Codex</button></div>";
+    m.innerHTML = "<div class='box' id='tutVictory'><h2>The chart is yours</h2><p>The trial is complete. Today's remaining scans are open: <b>" + scans + "</b>. Nothing extra was added.</p><p>Healing potions, once: <b>" + n + " Healing Potions</b>.</p><button class='pri' id='tutDone' style='width:100%'>Walk the Codex</button></div>";
     document.body.appendChild(m);
     m.querySelector("#tutDone").onclick = function () { m.remove(); };
   }
@@ -476,15 +533,81 @@
       return r;
     };
   });
+  hook("newBattle", function (orig) {
+    return function () {
+      var st = orig.apply(this, arguments);
+      if (st && st.units) st.units.forEach(ensureMe);
+      return st;
+    };
+  });
+  hook("nextTurn", function (orig) {
+    return function (st) {
+      var r = orig.apply(this, arguments);
+      if (!st || st.over) return r;
+      var u = st.queue ? st.units[st.queue[st.qi]] : null;
+      var gained = recoverMagic(u);
+      if (gained > 0 && st === B) {
+        var note = document.getElementById("meBar");
+        if (note) note.dataset.gain = "+" + gained;
+      }
+      return r;
+    };
+  });
+  hook("aiPlan", function (orig) {
+    return function (st, u) {
+      var plan = orig.apply(this, arguments);
+      if (plan && plan.a && magicCost(plan.a) > ((u && u.me) || 0)) {
+        var key = plan.a.k;
+        var prev = u.cd ? u.cd[key] : 0;
+        if (u.cd) u.cd[key] = 99;
+        var again = orig.call(this, st, u);
+        if (u.cd) u.cd[key] = prev;
+        return again;
+      }
+      return plan;
+    };
+  });
+  hook("panelTurn", function (orig) {
+    return function () {
+      var r = orig.apply(this, arguments);
+      try {
+        var u = ui && ui.sel;
+        if (!u) return r;
+        ensureMe(u);
+        document.querySelectorAll("#bPanel .acts button").forEach(function (b) {
+          var a = (typeof actsOf === "function" ? actsOf(u) : []).filter(function (act) {
+            return b.textContent.replace(/^\s+/, "").indexOf(act.n) === 0;
+          })[0];
+          var cost = magicCost(a);
+          if (!cost) return;
+          b.insertAdjacentHTML("beforeend", "<br><span class='mecost'>" + cost + " magic energy</span>");
+          if ((u.me | 0) < cost) {
+            b.disabled = true;
+            b.insertAdjacentHTML("beforeend", "<br><span>Not enough magic energy</span>");
+          }
+        });
+      } catch (e) {}
+      return r;
+    };
+  });
   hook("doAct", function (orig) {
     return function (st, u, a, t, mul) {
-      var cd0 = (u && u.cd && a && a.k && a.k !== "st") ? (u.cd[a.k] || 0) : 0;
+      var cost = magicCost(a);
+      if (u && cost) {
+        ensureMe(u);
+        if ((u.me | 0) < cost) {
+          if (st === B) toast("Not enough magic energy. It returns at the start of your turn.");
+          return {dmg: 0, em: 1, bm: 1, res: 1, bst: 1, heal: 0, eff: null, kill: false, noMe: true, meSpent: 0, cost: cost};
+        }
+        u.me -= cost;
+      }
       var res = orig.apply(this, arguments);
-      if (st && st.tutorial && u && u.side === 0 && a) {
+      if (res && cost) { res.meSpent = cost; res.meLeft = u.me; if (st === B) { paintMagic(); if (st.tutorial) paintCoach(); } }
+      if (st && st.tutorial && u && u.side === 0 && a && !(res && res.noMe)) {
         st.tutorial.playerActs = (st.tutorial.playerActs || 0) + 1;
         var stage = st.tutorial.stage;
         if (stage === 2 && a.k === "st" && res && res.dmg > 0) st.tutorial.hit = "strike";
-        if (stage === 3 && a.t === "ess" && a.k === "a1" && res && res.dmg > 0 && u.cd && u.cd[a.k] > cd0) st.tutorial.hit = "special";
+        if (stage === 3 && a.t === "ess" && a.k === "a1" && res && res.dmg > 0 && res.meSpent > 0) st.tutorial.hit = "special";
         if (stage === 4 && a.t === "ess" && res && res.em > 1 && res.dmg > 0) st.tutorial.hit = "super";
       }
       return res;
@@ -498,6 +621,7 @@
       }
       var r = orig.apply(this, arguments);
       paintCoach();
+      paintMagic();
       return r;
     };
   });
@@ -532,6 +656,7 @@
     return function () {
       var r = orig.apply(this, arguments);
       paintCoach();
+      paintMagic();
       return r;
     };
   });
@@ -562,6 +687,9 @@
       ability: ab && ab.n,
       essence: c && c.ess,
       cooldown: ab && ab.cd,
+      magic: player && player.me,
+      magicCost: magicCost(ab),
+      magicRegen: ME.regen,
       matchText: B.tutorial.match && B.tutorial.match.text
     };
     var brief = Core.stageBrief(stage, info);
@@ -579,10 +707,36 @@
   }
 
   function nodeClass(t, stage) {
-    if (!t || t.status === "await-scan" || t.status === "skipped") return "soon";
-    if (t.cleared && t.cleared[stage - 1]) return "done";
-    if (t.status === "active" && t.stage === stage) return "now";
-    return "soon";
+    if (t && t.cleared && t.cleared[stage - 1]) return "done";
+    if (t && t.status === "active" && t.stage === stage) return "yellow now";
+    return "yellow locked";
+  }
+  function paintMagic() {
+    if (typeof B === "undefined" || !B || !B.units || !document.getElementById("s-battle")) return;
+    var u = B.queue ? B.units[B.queue[B.qi]] : null;
+    if (!u || !u.alive) u = B.units.filter(function (x) { return x.side === 0 && x.alive; })[0];
+    if (!u) return;
+    ensureMe(u);
+    var host = document.getElementById("dio") || document.getElementById("s-battle");
+    var bar = document.getElementById("meBar");
+    if (!bar) { bar = document.createElement("div"); bar.id = "meBar"; host.appendChild(bar); }
+    var pct = Math.max(0, Math.min(100, Math.round(100 * (u.me || 0) / u.meMax)));
+    var dry = (u.me | 0) < ME.cost;
+    bar.className = dry ? "dry" : "";
+    var gain = bar.dataset.gain ? " " + bar.dataset.gain : "";
+    bar.innerHTML = "<span>Magic energy " + (u.me | 0) + "/" + u.meMax + gain + "</span><b><i style=\"width:" + pct + "%\"></i></b>" + (dry ? "<em>Not enough magic energy</em>" : "");
+    var acts = (typeof actsOf === "function") ? actsOf(u) : [];
+    document.querySelectorAll("#g16cards .sc").forEach(function (btn, i) {
+      var a = acts[i];
+      if (!a || btn.querySelector(".mecost")) return;
+      var cost = magicCost(a);
+      if (!cost) return;
+      var s = document.createElement("small");
+      s.className = "mecost";
+      s.textContent = cost + " energy";
+      btn.appendChild(s);
+      if ((u.me | 0) < cost) btn.classList.add("cd");
+    });
   }
 
   function dismissCall() {
@@ -607,18 +761,16 @@
       cooldown: player && player.ab && player.ab[0] && player.ab[0].cd,
       matchText: match && match.text
     }) : null;
-    var lead = "Five stages, in order. A node glows yellow while it is yours to walk, and solid green once it is truly done. Later nodes stay in sight, and they do not open early.";
-    if (t.status === "await-scan") lead = "The chart is drawn, but it sleeps until your first barcode beast answers.";
+    var lead = "Five stages, in order. Every unfinished stage glows yellow. A finished stage turns solid green. You cannot skip ahead.";
+    if (t.status === "await-scan") lead = "The chart is awake, but the first stage opens after one barcode beast answers.";
     if (t.status === "skipped" && t.legacy) lead = "This Codex was already walked before the trial existed. Your beasts and items are unchanged, and the five potions were not added. You may revisit the lessons; they will not pay twice.";
-    if (t.status === "skipped" && !t.legacy) lead = "The starter pack waived the mandatory trial. Revisit it whenever you like. Potions are not paid for a waived chart.";
     if (t.status === "complete" && !t.replay) lead = "The five stages are sealed. The roads of the Codex are open.";
-    var nodes = Core.STAGES.map(function (st, i) {
+    var nodes = "<ol class='tut-road'>" + Core.STAGES.map(function (st, i) {
       var cls = nodeClass(t, st.id);
-      var y = [80, 220, 360, 510, 660][i];
-      var x = [28, 72, 30, 70, 48][i];
-      var mark = cls === "done" ? "✓" : (cls === "now" ? "●" : "○");
-      return "<button class='tut-node " + cls + "' data-stage='" + st.id + "' style='left:" + x + "%;top:" + y + "px' " + (cls === "soon" && t.status !== "active" ? "" : "") + "><span class='n'>" + mark + " " + st.id + "</span>" + esc(st.name) + "<small>" + esc(st.kicker) + "</small></button>";
-    }).join("");
+      var mark = cls === "done" ? "✓" : (cls.indexOf("now") >= 0 ? "●" : "○");
+      var join = i ? "<i class='tut-join'></i>" : "";
+      return "<li>" + join + "<button type='button' class='tut-node " + cls + "' data-stage='" + st.id + "'><span class='n'>" + mark + " " + st.id + "</span>" + esc(st.name) + "<small>" + esc(st.kicker) + (cls.indexOf("now") >= 0 ? " · now" : "") + "</small></button></li>";
+    }).join("") + "</ol>";
     var go = "";
     if (t.status === "active") go = "<button class='tut-go' id='tutGo'>Enter stage " + t.stage + "</button>";
     var again = (t.status === "complete" || t.status === "skipped") ? "<button class='tut-replay' id='tutReplay'>Revisit the trial · no extra potions</button>" : "";
@@ -628,10 +780,7 @@
       "<i class='tut-seal tl'></i><i class='tut-seal tr'></i><i class='tut-seal bl'></i><i class='tut-seal br'></i>" +
       "<div class='tut-kicker'>Field chart</div><h2>The First Tracing</h2>" +
       "<p class='tut-lead'>" + esc(lead) + "</p>" +
-      "<div class='tut-map'>" +
-      "<svg class='tut-path' viewBox='0 0 100 760' preserveAspectRatio='none' aria-hidden='true'>" +
-      "<path d='M28 110 C 40 160, 78 180, 72 250 S 20 330, 30 390 S 80 470, 70 540 S 30 610, 48 690' fill='none' stroke='#6b4428' stroke-width='1.6' stroke-dasharray='3 2' vector-effect='non-scaling-stroke'/>" +
-      "</svg>" + nodes + "</div>" + guide + go + again +
+      nodes + guide + go + again +
       "<p class='tut-note'>Codex Beasts come from mythology, lore, and urban legend, or were created through more than one means. This chart teaches the field. It is not a longer campaign.</p>" +
       "</div></div></div>";
     var home = document.getElementById("tutHome");
@@ -642,7 +791,7 @@
         var cur = tut();
         if (!cur || cur.status !== "active") { toast("The trial is not waiting on that node."); return; }
         if (cur.cleared[stage - 1]) { toast("That stage is already sealed."); return; }
-        if (cur.stage !== stage) { toast("The road is walked in order. The yellow node is the one that is open."); return; }
+        if (cur.stage !== stage) { toast("The road is walked in order. Only the stage marked now will open."); return; }
         startStage(stage);
       };
     });
@@ -705,6 +854,10 @@
 
   window.CBTutorial = {
     core: Core,
+    magicCost: magicCost,
+    magicMax: ME.max,
+    magicRegen: ME.regen,
+    recoverMagic: recoverMagic,
     state: function () { return tut(); },
     startStage: startStage,
     replay: replay,

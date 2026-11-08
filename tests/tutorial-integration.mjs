@@ -180,10 +180,9 @@ try {
         if (!a) return {ok: false, why: "no essence", el: p.c.el, ab: p.c.ab};
         if (dist > a.r || dist <= 1) return {ok: false, why: "essence placement", dist, r: a.r, el: p.c.el};
         const preview = calcDmg(B, p, p.x, p.y, e, a);
-        const cd0 = p.cd[a.k] || 0;
+        const me0 = p.me;
         const res = doAct(B, p, a, e);
-        const cd1 = p.cd[a.k];
-        const info = {el: p.c.el, enemy: e.c.el, dist, dmg: res.dmg, em: res.em, bm: res.bm, cd0, cd1, ess: p.c.ess, biome: B.biome};
+        const info = {el: p.c.el, enemy: e.c.el, dist, dmg: res.dmg, em: res.em, bm: res.bm, me0, me1: p.me, meSpent: res.meSpent, biome: B.biome};
         beginTurn();
         return Object.assign(info, {ok: !!CBTutorial.state().cleared[stage - 1]});
       }
@@ -257,7 +256,8 @@ try {
     assert.equal(summary.s2.ok, true, JSON.stringify(summary.s2));
     assert.equal(summary.s2.em, 1, "Strike is physical and not super effective");
     assert.equal(summary.s3.ok, true, JSON.stringify(summary.s3));
-    assert.ok(summary.s3.cd1 > summary.s3.cd0, "essence art must spend its cooldown");
+    assert.ok(summary.s3.meSpent > 0, "the special must spend magic energy");
+    assert.equal(summary.s3.me1, summary.s3.me0 - summary.s3.meSpent);
     assert.equal(summary.s4.ok, true, JSON.stringify(summary.s4));
     assert.ok(summary.s4.em > 1, "stage 4 hit must be super effective");
     assert.equal(summary.early, false);
@@ -426,9 +426,16 @@ try {
         const withEss = calcDmg(B, {c: boosted, x: p.x, y: p.y}, p.x, p.y, e, ess).dmg;
         const powered = Object.assign({}, p.c, {pow: p.c.pow + 30});
         const withPow = calcDmg(B, {c: powered, x: p.x, y: p.y}, p.x, p.y, e, ess).dmg;
-        const cd0 = p.cd[ess.k] || 0;
-        doAct(B, p, ess, e);
-        const cd1 = p.cd[ess.k];
+        const me0 = p.me;
+        const strike = actsOf(p).find(a => a.k === "st");
+        const meStrike = p.me;
+        doAct(B, p, strike, e);
+        const afterStrike = p.me;
+        const cast = doAct(B, p, ess, e);
+        const me1 = p.me;
+        const blocked = doAct(B, p, ess, e);
+        const restored = CBTutorial.recoverMagic(p);
+        const me2 = p.me;
         beginTurn();
         CB.save().tutorial.stage = 4;
         CB.save().tutorial.cleared = [true, true, true, false, false];
@@ -443,7 +450,7 @@ try {
         beginTurn();
         out.push({
           el, code, enemy: m.enemyEl, biome: m.biome, kind: m.kind, live, back,
-          started, dist, r: ess.r, cd0, cd1, before, withEss, withPow,
+          started, dist, r: ess.r, me0, meStrike, afterStrike, me1, meSpent: cast && cast.meSpent, blocked: !!(blocked && blocked.noMe), restored, me2, before, withEss, withPow,
           em: res.em, bm: res.bm, pm: m.playerMult, foeCount, text,
           cleared3: CB.save().tutorial.cleared[2],
           baby: p.c.baby || p.c.ab[1].locked
@@ -457,8 +464,12 @@ try {
       assert.equal(row.back, 0.7, row.el);
       assert.equal(row.started, true, JSON.stringify(row));
       assert.ok(row.dist <= row.r && row.dist > 1, row.el + " placement " + row.dist);
-      assert.ok(row.cd1 > row.cd0, row.el + " cooldown");
-      assert.ok(row.withEss > row.before, row.el + " essence must change magic damage");
+      assert.equal(row.afterStrike, row.me0, row.el + " Strike must not spend magic energy");
+      assert.equal(row.meSpent, 4, row.el);
+      assert.equal(row.me1, row.me0 - 4, row.el);
+      assert.equal(row.blocked, true, row.el + " a second special in the same turn is exhausted");
+      assert.ok(row.restored >= 4 && row.me2 >= 4, row.el + " recovery");
+      assert.ok(row.withEss > row.before, row.el + " essence still prices damage");
       assert.equal(row.withPow, row.before, row.el + " Power must not price an essence art");
       assert.equal(row.foeCount, 1, row.el);
       assert.ok(row.em > 1, row.el + " em " + row.em);
@@ -527,23 +538,71 @@ try {
     await page.close();
   });
 
-  check("starter pack waives the trial and keeps all eight beasts", async () => {
+  check("starter pack cannot skip the trial on a new game", async () => {
     const {page} = await boot(browser);
     const out = await page.evaluate(() => {
+      newGameForm();
+      const box = document.querySelector("#starter");
+      const form = {disabled: !!(box && box.disabled), checked: !!(box && box.checked)};
+      document.querySelectorAll(".modal").forEach(m => m.remove());
       newGame("Bea", 2, 3, true);
+      const beforeScan = CB.save().order.length;
+      const first = addCode("888777666555", "manual");
+      const second = addCode("111222333444", "manual");
       const s = CB.save();
       return {
-        status: s.tutorial.status, reason: s.tutorial.reason, legacy: s.tutorial.legacy,
-        n: s.order.length, potions: s.inv.filter(i => i.src === "tutorial:potion").length,
-        energy: energy()
+        form, beforeScan, first, second, status: s.tutorial.status, n: s.order.length,
+        energy: energy(), potionName: ITEMS.herb.n, potionId: "herb"
       };
     });
-    assert.equal(out.status, "skipped");
-    assert.equal(out.reason, "starter-pack");
-    assert.equal(out.legacy, false);
-    assert.equal(out.n, 8);
-    assert.equal(out.potions, 0);
-    assert.equal(out.energy, 6);
+    assert.equal(out.form.disabled, true);
+    assert.equal(out.form.checked, false);
+    assert.equal(out.beforeScan, 0, "the pack must not add eight beasts");
+    assert.equal(out.first, true);
+    assert.equal(out.second, false);
+    assert.equal(out.status, "active");
+    assert.equal(out.n, 1);
+    assert.equal(out.energy, 5);
+    assert.equal(out.potionName, "Healing Potion");
+    assert.equal(out.potionId, "herb");
+    await page.close();
+  });
+
+  check("the chart is flat, centered, and every unfinished node is yellow", async () => {
+    const {page} = await boot(browser);
+    const out = await page.evaluate(async () => {
+      newGame("Ada", 0, 1, false);
+      addCode("123456789012", "manual");
+      if (typeof closeReveal === "function") closeReveal();
+      show("campaign");
+      const camp = document.getElementById("s-campaign");
+      camp.classList.add("pflip");
+      await new Promise(r => setTimeout(r, 400));
+      const cs = getComputedStyle(camp);
+      const frame = document.getElementById("tutMap").getBoundingClientRect();
+      const nodes = [...document.querySelectorAll("#tutMap .tut-node")];
+      const boxes = nodes.map(n => {
+        const r = n.getBoundingClientRect();
+        return {cls: n.className, w: r.width, mid: (r.left + r.right) / 2, top: r.top, text: n.innerText.replace(/\s+/g, " ")};
+      });
+      const mid = (frame.left + frame.right) / 2;
+      return {
+        transform: cs.transform, animation: cs.animationName, opacity: cs.opacity,
+        count: nodes.length, mid, boxes,
+        lead: document.querySelector(".tut-lead").innerText
+      };
+    });
+    assert.equal(out.count, 5);
+    assert.equal(out.transform, "none");
+    assert.ok(out.animation === "none" || out.animation === "");
+    assert.equal(out.boxes.filter(b => b.cls.includes("yellow")).length, 5);
+    assert.match(out.lead, /yellow/);
+    assert.match(out.lead, /green/);
+    for (const b of out.boxes) {
+      assert.ok(b.w > 140, b.text);
+      assert.ok(Math.abs(b.mid - out.mid) < 30, b.text + " mid " + b.mid + " frame " + out.mid);
+      assert.match(b.text, /[A-Za-z]/);
+    }
     await page.close();
   });
 

@@ -329,11 +329,14 @@
       };
     }
     if (stage === 3) {
-      var ab = info.ability || "Your essence art";
+      var ab = info.ability || "Your special";
+      var cost = info.magicCost != null ? info.magicCost : 4;
+      var have = info.magic != null ? info.magic : cost;
+      var back = info.magicRegen != null ? info.magicRegen : 4;
       return {
-        title: "Essence, the magic",
-        ask: "Land " + ab + ". A Strike will not finish this lesson.",
-        body: ab + " is magic. It strikes with Essence (" + (info.essence != null ? info.essence : "your magic stat") + "), not Power, then cools down — that cooldown is its cost" + (info.cooldown != null ? " (" + info.cooldown + " turn)" : "") + ". This foe stands where every first beast's special can reach."
+        title: "Magic energy",
+        ask: "Use " + ab + ". It spends " + cost + " magic energy.",
+        body: "Magic energy is the pool a special spends. You have " + have + ". This cast spends " + cost + " and leaves the pool lower. Your next turn restores " + back + ". A Strike spends none. The foe is close enough for every first beast's special."
       };
     }
     if (stage === 4) {

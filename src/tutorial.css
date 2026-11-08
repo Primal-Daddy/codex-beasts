@@ -1,4 +1,15 @@
-/* Five-stage trial: a scrolled field chart on old parchment. */
+/* The campaign screen inherits the journal page-turn (.screen.pflip rotates
+   the whole screen around its left edge). That is what tilted the chart.
+   The trial map stays flat and front-facing. */
+#s-campaign.screen,
+#s-campaign.screen.pflip {
+  animation: none !important;
+  transform: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  perspective: none !important;
+}
+/* Five-stage trial: a flat scrolled field chart. */
 #s-campaign .tut-frame {
   margin: 4px 0 8px;
   border-radius: 18px;
@@ -70,61 +81,70 @@
   margin: 6px 8px 8px;
 }
 #s-campaign .tut-note { font-style: italic; color: #5a3a1c; }
-#s-campaign .tut-map {
-  position: relative;
-  height: 760px;
-  margin: 8px 4px 4px;
+#s-campaign .tut-road {
+  list-style: none;
+  margin: 4px auto 8px;
+  padding: 0;
+  width: min(280px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
-#s-campaign .tut-map svg.tut-path {
-  position: absolute;
-  inset: 0;
+#s-campaign .tut-road li {
   width: 100%;
-  height: 100%;
-  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#s-campaign .tut-join {
+  width: 4px;
+  height: 16px;
+  background: #6b4428;
+  border-radius: 2px;
 }
 #s-campaign .tut-node {
-  position: absolute;
-  width: 74px;
-  min-height: 74px;
-  margin-left: -37px;
-  padding: 8px 4px 6px;
-  border-radius: 40% 46% 42% 48%;
+  position: relative;
+  width: 100%;
+  min-height: 58px;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 14px;
   border: 2px solid #4a3018;
   background: #e7d3a6;
-  color: #3a2412;
-  font: 700 12px/1.15 Georgia, serif;
+  color: #2a1608;
+  font: 700 15px/1.2 Georgia, serif;
   text-align: center;
   touch-action: manipulation;
-  z-index: 1;
+  transform: none;
 }
 #s-campaign .tut-node small {
   display: block;
   font-weight: 600;
-  font-size: 10px;
-  letter-spacing: .2px;
+  font-size: 12px;
+  letter-spacing: 0;
+  color: #3a2412;
 }
-#s-campaign .tut-node .n {
-  display: block;
-  font-size: 16px;
-  margin-bottom: 1px;
-}
-#s-campaign .tut-node.soon { opacity: .72; filter: saturate(.7); }
-#s-campaign .tut-node.now {
-  background: radial-gradient(circle at 40% 32%, #fff8d0, #ffd45a 42%, #e0a020 78%);
+#s-campaign .tut-node .n { font-size: 16px; margin-right: 4px; }
+#s-campaign .tut-node.yellow {
+  background: radial-gradient(circle at 50% 30%, #fff6c4, #ffd34a 55%, #e39b14 100%);
   color: #3a2208;
-  box-shadow: 0 0 0 3px #fff1b0, 0 0 16px 4px #ffe36bcc, 0 0 28px 8px #ffb00088;
-  animation: tut-pulse 1.5s ease-in-out infinite;
+  border-color: #8a5a10;
+  box-shadow: 0 0 0 3px #fff1b0, 0 0 16px 4px #ffd24acc;
   opacity: 1;
-  z-index: 2;
+  filter: none;
 }
+#s-campaign .tut-node.yellow.now {
+  box-shadow: 0 0 0 4px #fff, 0 0 22px 6px #ffbf00;
+}
+#s-campaign .tut-node.yellow.locked { cursor: default; }
 #s-campaign .tut-node.done {
-  background: radial-gradient(circle at 40% 32%, #f3ffe8, #5ee08a 40%, #1f8a44 80%);
-  color: #06210f;
+  background: radial-gradient(circle at 50% 30%, #f3ffe8, #3ecf6e 48%, #157a38 100%);
+  color: #04210f;
   border-color: #0e4a24;
-  box-shadow: 0 0 0 3px #b6f5c8, 0 0 14px 3px #3dce72, 0 0 26px 8px #1c8a4488;
+  box-shadow: 0 0 0 3px #b6f5c8, 0 0 16px 4px #2fbf62;
   opacity: 1;
+  filter: none;
 }
-#s-campaign .tut-node:disabled { cursor: default; }
 #s-campaign .tut-go, #s-campaign .tut-replay {
   position: relative;
   z-index: 1;
@@ -153,12 +173,26 @@
   background: #fff6e088;
 }
 #s-campaign .tut-guide b { color: #6a1010; }
-@keyframes tut-pulse {
-  50% { box-shadow: 0 0 0 4px #fff6c8, 0 0 22px 8px #ffe36b, 0 0 36px 12px #ff9a00aa; }
+#meBar {
+  position: absolute;
+  left: 8px;
+  top: 200px;
+  width: 168px;
+  z-index: 74;
+  padding: 4px 8px 6px;
+  border-radius: 8px;
+  background: #1c1610ee;
+  color: #f3e3b8;
+  border: 1px solid #c9a35a;
+  font: 700 12px/1.2 Georgia, serif;
+  pointer-events: none;
 }
-@media (prefers-reduced-motion: reduce) {
-  #s-campaign .tut-node.now { animation: none; }
-}
+body:not(.tut-battle) #meBar { top: calc(env(safe-area-inset-top) + 46px); left: auto; right: 8px; }
+#meBar b { display: block; height: 8px; margin-top: 3px; border-radius: 4px; background: #3a2610; overflow: hidden; }
+#meBar b i { display: block; height: 100%; width: 0; background: linear-gradient(#9ad7ff, #3f7dff); }
+#meBar.dry b i { background: #a33; }
+#meBar em { display: block; font-style: normal; color: #ffb4a8; font-size: 11px; }
+#g16cards .sc .mecost { display: block; font-size: 9px; font-weight: 700; color: #9ad7ff; }
 
 /* Battle lesson card. Sits under the flee row and stays tappable-clear of the board centre. */
 #tutCoach {

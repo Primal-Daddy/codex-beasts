@@ -199,10 +199,10 @@ test("stage copy names mythology, legend, and other origins without skipping the
   assert.match(a.body, /mythology, folklore, and urban legend/);
   assert.match(a.body, /created through other means/);
   assert.match(a.ask, /actually move/);
-  const b = Core.stageBrief(3, {ability: "Flame Burst", essence: 20, cooldown: 1});
-  assert.match(b.body, /Essence \(20\)/);
-  assert.match(b.body, /cooldown is its cost/);
-  assert.match(b.ask, /Strike will not finish/);
+  const b = Core.stageBrief(3, {ability: "Flame Burst", essence: 20, cooldown: 1, magic: 4, magicCost: 4, magicRegen: 4});
+  assert.match(b.body, /Magic energy is the pool a special spends/);
+  assert.match(b.ask, /spends 4 magic energy/);
+  assert.doesNotMatch(b.body + b.ask, /cooldown is its cost|strikes with Essence/);
   const c = Core.stageBrief(5, {});
   assert.match(c.ask, /have to win/);
   assert.match(c.body, /full health/);

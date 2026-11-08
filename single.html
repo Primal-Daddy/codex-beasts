@@ -4863,7 +4863,7 @@ const PAYMENTS_PROVIDER={name:"TEST MODE",test:true,
   m.querySelector("#mockPay").onclick=()=>{m.remove();res({ok:true,receipt:"test-"+Date.now()})};const cl=m.querySelector(".close");cl.addEventListener("click",()=>res({ok:false}));});}};
 // ---- ITEM CATALOGUE (JSON-like) ----  r: rarity 0-4 · cat: battle/tonic/catalyst/lure/tool · tr: tradable
 const ITEMS={
- herb:{n:"Healing Herb",cat:"battle",r:0,g:"leaf",d:"Restores 35% of max HP to the user.",tr:true},
+ herb:{n:"Healing Potion",cat:"battle",r:0,g:"leaf",d:"A healing potion. Restores 35% of max HP to the user.",tr:true},
  salve:{n:"Cleanse Salve",cat:"battle",r:0,g:"jar",d:"Removes Burn and Slow, and restores 10% HP.",tr:true},
  tonic_s:{n:"Minor XP Tonic",cat:"tonic",r:0,g:"flask",col:"#7be36b",d:"Gives a creature +50 XP.",xp:50,tr:true},
  poultice:{n:"Moonpetal Poultice",cat:"battle",r:1,g:"leaf2",d:"Restores 70% of max HP to the user.",tr:true},
